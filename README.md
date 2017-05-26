@@ -1,2 +1,2 @@
 # spykeball
-python statistics library for the game of SpikeBall
+python statistics library for the game of Spikeball®
