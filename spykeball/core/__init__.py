@@ -1,0 +1,1 @@
+"""spykeball Core package."""

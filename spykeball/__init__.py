@@ -1,1 +1,1 @@
-
+"""The spykeball package."""
