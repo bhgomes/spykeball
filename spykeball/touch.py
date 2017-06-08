@@ -9,7 +9,7 @@ from spykeball.player import Player
 class _AbstractTouch(metaclass=ABCMeta):
     """Abstract definition of a Spikeball touch."""
 
-    def __init__(self, actor, success, target):
+    def __init__(self, actor, success=True, target=None):
         """Initialize Abstract Touch Class."""
         self._actor = actor
         self._success = success
@@ -34,7 +34,7 @@ class _AbstractTouch(metaclass=ABCMeta):
 class Service(_AbstractTouch):
     """Service."""
 
-    def __init__(self, actor, success, target, is_ace):
+    def __init__(self, actor, success=True, target=None, is_ace=False):
         """Initialize Service."""
         self._is_ace = is_ace if success else False
         super().__init__(actor, success, target)
@@ -48,7 +48,8 @@ class Service(_AbstractTouch):
 class Set(_AbstractTouch):
     """Set."""
 
-    def __init__(self, actor, success, strength):
+    def __init__(self, actor, success=True, strength=None):
+        # none means it has no qualifier
         """Initialize Set."""
         self._strength = strength
         super().__init__(actor, success, target=None)
@@ -62,7 +63,7 @@ class Set(_AbstractTouch):
 class Spike(_AbstractTouch):
     """Spike."""
 
-    def __init__(self, actor, success, strength):
+    def __init__(self, actor, success=True, strength=None):
         """Initialize Spike."""
         self._strength = strength
         super().__init__(actor, success, target=None)
@@ -71,7 +72,7 @@ class Spike(_AbstractTouch):
 class _AbstractReturn(_AbstractTouch):
     """Abstract Return."""
 
-    def __init__(self, actor, success, strength):
+    def __init__(self, actor, success=True, strength=None):
         """Initialize Abstract Return."""
         self._strength = strength
         super().__init__(actor, success, target=None)
@@ -85,7 +86,7 @@ class _AbstractReturn(_AbstractTouch):
 class ServiceReturn(_AbstractReturn):
     """Service Return."""
 
-    def __init__(self, actor, success, strength):
+    def __init__(self, actor, success=True, strength=None):
         """Initialize Service Return."""
         super().__init__(actor, success, strength)
 
@@ -93,7 +94,7 @@ class ServiceReturn(_AbstractReturn):
 class DefensiveReturn(_AbstractReturn):
     """Defensive Return."""
 
-    def __init__(self, actor, success, strength):
+    def __init__(self, actor, success=True, strength=None):
         """Initialize Defensive Return."""
         super().__init__(actor, success, strength)
 
@@ -119,40 +120,63 @@ class ActionList(object):
     def parse(p1, p2, p3, p4, *actions):
         """Parse actions into AbstractTouches."""
         output = []
+        # add meta data like the score and stuff
 
-        for a, action in enumerate(actions):
+        for point in actions:
             current_point = []
             current_step = 0
-            current_team = 0
+            service = True
+            
+            current_team = ("1", "2")
+            other_team = ("3", "4")
             current_player = None
-            for s, step in enumerate(action):
-
-                def assign_player(player, team_num):
-                    global current_player
-                    global current_team
-                    current_player = player
-                    current_team = team_num
-                    return current_player
-
-                action_type_dictionary = {
-                    "1": assign_player(p1, 1),
-                    "2": assign_player(p2, 1),
-                    "3": assign_player(p3, 2),
-                    "4": assign_player(p4, 2),
-                    "a": None,
-                    "e": None,
-                    "n": None,
-                    "p": None,
-                    "s": None,
-                    "w": None
-                }
-
-                value = action_type_dictionary.get(step)
-                if value is None:
-                    # add to this error
-                    raise KeyError("Not a valid action-string", action)
-                
+            
+            action_deque = deque(point)
+            
+            next_obj = lambda: action_deque.popleft()
+            
+            def verify_action_deque_empty(error_on=False):
+                if error_on:
+                    if len(action_deque) == 0:
+                        raise Exception("FIX THIS")
+                else:
+                    if len(action_deque) != 0:
+                        raise Exception("FIX THIS")
+            
+            def swap_teams():
+                if current_player not in current_team:
+                    if current_player not in other_team:
+                        raise Exception("FIX THIS")
+                    else:
+                        current_team, other_team = other_team, current_team
+            
+            while len(action_deque) != 0:
+                if service:
+                    current_player = next_obj()
+                    
+                    # swap teams if necessary
+                    swap_teams()
+                    
+                    modifier = next_obj()
+                    if modifier == "a":
+                        target = next_obj()
+                        current_point.append(Service(current, success=True, target=target, is_ace=True))
+                        verify_action_deque_empty(error_on=False)
+                    elif modifier in other_team:
+                        current_point.append(Service(current, success=True, target=modifier))
+                        current_player = modifier
+                    elif modifier == "n":
+                        current_point.append(Service(current, success=False))
+                        verify_action_deque_empty(error_on=False)
+                    else:
+                        raise Exception("FIX THIS")
+                    service = False
+                else:
+                    pass
+            
             output.append(current_point)
+                    
+                        
 
         return output
 
