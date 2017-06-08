@@ -1,8 +1,10 @@
+"""Current Testing Suite."""
+
 from spykeball.player import Player
 from spykeball.game import Game
 
-P1 = Player("Bob", 102302)s
-P2 = Player("Joe")
+P1 = Player("Billy")
+P2 = Player("Bobby")
 P3 = Player("Max")
 P4 = Player("Cole")
 
