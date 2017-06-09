@@ -2,9 +2,6 @@
 
 from collections import deque
 
-# maybe do type annotations
-# from spykeball.player import Player
-
 
 class _AbstractTouch(object):
     """Abstract definition of a Spikeball touch."""
@@ -62,26 +59,25 @@ class Service(_AbstractTouch):
 class Defense(_AbstractTouch):
     """Defensive Return."""
 
-    def __init__(self, actor, success=True, strength=None):
+    def __init__(self, actor, success=True, target=None, strength=None):
         """Initialize Defensive Return."""
-        super().__init__(actor, success, target=None, strength=strength)
+        super().__init__(actor, success, target, strength)
 
 
 class Set(_AbstractTouch):
     """Set."""
 
-    def __init__(self, actor, success=True, strength=None):
-        # none means it has no qualifier
+    def __init__(self, actor, success=True, target=None, strength=None):
         """Initialize Set."""
-        super().__init__(actor, success, target=None, strength=strength)
+        super().__init__(actor, success, target, strength)
 
 
 class Spike(_AbstractTouch):
     """Spike."""
 
-    def __init__(self, actor, success=True, strength=None):
+    def __init__(self, actor, success=True, target=None, strength=None):
         """Initialize Spike."""
-        super().__init__(actor, success, target=None, strength=strength)
+        super().__init__(actor, success, target, strength)
 
 
 Service._next = Defense
@@ -102,10 +98,32 @@ class ActionList(object):
         self._meta = {}
         self._action_list_strings = actions
         self._action_list = ActionList.parse(p1, p2, p3, p4, actions)
+        self._iterator_index = 0
 
     def __str__(self):
         """Return string representation of the ActionList."""
         return ", ".join(self._action_list_strings)
+    
+    def __iter__(self):
+    	"""Return iterator object for ActionList."""
+    	return self
+    
+    def __next__(self):
+    	"""Return next action in the ActionList."""
+    	if self._iterator_index >= len(self._action_list):
+    		raise StopIteration
+    	else:
+    		self._iterator_index += 1
+    		return self._action_list[self._iterator_index]
+    	
+    
+    def __contains__(self, item):
+    	"""Return True if item is contained in ActionList."""
+    	return item in self._action_list
+    
+    def __len__(self):
+    	"""Return length of ActionList."""
+    	return len(self._action_list)
 
     @staticmethod
     def parse(p1, p2, p3, p4, *actions):
@@ -145,40 +163,14 @@ class ActionList(object):
                 global focus
                 global same_team
                 global other_team
+                
                 focus = player
 
                 if focus not in same_team:
-                    if focus not in other_team:
-                        raise Exception("FIX THIS")
+                    if focus in other_team:
+                    	same_team, other_team = other_team, same_team
                     else:
-                        same_team, other_team = other_team, same_team
-
-            def add_defense(target, strength=None):
-                touch_list.append(Defense(pmap(focus),
-                                          success=True,
-                                          target=pmap(target),
-                                          strength=strength))
-                set_focus(target)
-                global touch
-                touch = Set
-
-            def add_set(target, strength=None):
-                touch_list.append(Set(pmap(focus),
-                                      success=True,
-                                      target=pmap(target),
-                                      strength=strength))
-                set_focus(target)
-                global touch
-                touch = Spike
-
-            def add_spike(target, strength=None):
-                touch_list.append(Spike(pmap(focus),
-                                        success=True,
-                                        target=pmap(target),
-                                        strength=strength))
-                set_focus(target)
-                global touch
-                touch = Defense
+                        raise Exception("FIX THIS")
 
             while len(action_deque) != 0:
                 if touch is Service:
@@ -192,7 +184,6 @@ class ActionList(object):
                         target = next_touch()
                         if target in other_team:
                             touch_list.append(Service(pmap(focus),
-                                                      success=True,
                                                       target=pmap(target),
                                                       is_ace=True))
                         else:
@@ -200,7 +191,6 @@ class ActionList(object):
                         verify_action_deque_empty(error_on=False)
                     elif modifier in other_team:
                         touch_list.append(Service(pmap(focus),
-                                                  success=True,
                                                   target=pmap(modifier)))
                         set_focus(modifier)
                         touch = Defense
@@ -215,7 +205,7 @@ class ActionList(object):
                         touch_list.append(clz(pmap(focus), success=False))
                         verify_action_deque_empty(error_on=False)
                     elif modifier == "p":
-                        touch_list.append(Spike(pmap(focus), success=True))
+                        touch_list.append(Spike(pmap(focus)))
                         verify_action_deque_empty(error_on=False)
 
                     if touch is Defense or touch is Set:
@@ -225,7 +215,6 @@ class ActionList(object):
                                 if target in other_team:
                                     touch = Spike
                                 touch_list.append(touch(pmap(focus),
-                                                        success=True,
                                                         target=pmap(target),
                                                         strength=modifier))
                                 set_focus(target)
@@ -237,7 +226,6 @@ class ActionList(object):
                             if modifier in other_team:
                                 touch = Spike
                             touch_list.append(touch(pmap(focus),
-                                                    success=True,
                                                     target=pmap(modifier)))
                             set_focus(target)
                             touch = touch.next
@@ -251,7 +239,6 @@ class ActionList(object):
                             target = next_touch()
                             if target in other_team:
                                 touch_list.append(touch(pmap(focus),
-                                                        success=True,
                                                         target=pmap(target),
                                                         strength=modifier))
                                 set_focus(target)
@@ -261,7 +248,6 @@ class ActionList(object):
 
                         elif modifier in other_team:
                             touch_list.append(touch(pmap(focus),
-                                                    success=True,
                                                     target=pmap(modifier)))
                             set_focus(target)
                             touch = touch.next
@@ -272,7 +258,7 @@ class ActionList(object):
                             raise Exception("FIX THIS")
 
                     else:
-                        pass
+                        raise Exception("FIX THIS")
 
             output.append(touch_list)
 
@@ -291,7 +277,7 @@ class ActionList(object):
             self._p1, self._p2, self._p3, self._p4, acts)
 
     @property
-    def as_string_list(self):
+    def as_strings(self):
         """Return the ActionList as a list of strings."""
         return self._action_list_strings
 
@@ -303,5 +289,12 @@ class ActionList(object):
     def compile_actions(self, player):
         """Find all actions related to the player and return."""
         output = {"actor": [], "target": []}
+
+		for action in self._action_list:
+			if action.actor == player:
+				output["actor"].append(action)
+			
+			if action.target == player:
+				output["target"].append(action)
 
         return output
