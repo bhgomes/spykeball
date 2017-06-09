@@ -2,8 +2,8 @@
 
 from abc import ABCMeta, abstractmethod
 
-from spykeball.core.exception import InvalidGameException
-from spykeball.touch import Set, Spike, DefensiveReturn, Service
+# from spykeball.core.exception import InvalidGameException
+from spykeball.touch import Defense, Set, Spike, Service
 
 
 class StatModel(metaclass=ABCMeta):
@@ -53,7 +53,7 @@ class Model1(StatModel):
                     pass
                 elif isinstance(act, Spike):
                     pass
-                elif isinstance(act, DefensiveReturn):
+                elif isinstance(act, Defense):
                     if act.successful:
                         d_touch_r += 1
                     else:

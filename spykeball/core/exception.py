@@ -19,3 +19,13 @@ class InvalidGameException(Exception):
         self.message = message
         self.game = game
         super().__init__(message, game, *args)
+
+
+class InvalidTouchMapException(Exception):
+    """Raise if a game is invalid."""
+
+    def __init__(self, message, touch_string, *args):
+        """Initialize with the invalid game."""
+        self.message = message
+        self.touch_string = touch_string
+        super().__init__(message, touch_string, *args)

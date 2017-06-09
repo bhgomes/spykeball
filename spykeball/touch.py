@@ -1,19 +1,22 @@
 """Touch Classes."""
 
-from abc import ABCMeta, abstractmethod
+from collections import deque
 
 # maybe do type annotations
-from spykeball.player import Player
+# from spykeball.player import Player
 
 
-class _AbstractTouch(metaclass=ABCMeta):
+class _AbstractTouch(object):
     """Abstract definition of a Spikeball touch."""
 
-    def __init__(self, actor, success=True, target=None):
+    _next = None
+
+    def __init__(self, actor, success=True, target=None, strength=None):
         """Initialize Abstract Touch Class."""
         self._actor = actor
         self._success = success
         self._target = target
+        self._strength = strength
 
     @property
     def actor(self):
@@ -30,11 +33,22 @@ class _AbstractTouch(metaclass=ABCMeta):
         """Return target Player."""
         return self._player
 
+    @property
+    def strength(self):
+        """Return strength of the Touch."""
+        return self._player
+
+    @classmethod
+    @property
+    def next(cls):
+        return cls._next
+
 
 class Service(_AbstractTouch):
     """Service."""
 
-    def __init__(self, actor, success=True, target=None, is_ace=False):
+    def __init__(self, actor, success=True, target=None, strength=None,
+                 is_ace=False):
         """Initialize Service."""
         self._is_ace = is_ace if success else False
         super().__init__(actor, success, target)
@@ -45,19 +59,21 @@ class Service(_AbstractTouch):
         return self._is_ace
 
 
+class Defense(_AbstractTouch):
+    """Defensive Return."""
+
+    def __init__(self, actor, success=True, strength=None):
+        """Initialize Defensive Return."""
+        super().__init__(actor, success, target=None, strength=strength)
+
+
 class Set(_AbstractTouch):
     """Set."""
 
     def __init__(self, actor, success=True, strength=None):
         # none means it has no qualifier
         """Initialize Set."""
-        self._strength = strength
-        super().__init__(actor, success, target=None)
-
-    @property
-    def strength(self):
-        """Return strength of Set."""
-        return self._strength
+        super().__init__(actor, success, target=None, strength=strength)
 
 
 class Spike(_AbstractTouch):
@@ -65,38 +81,13 @@ class Spike(_AbstractTouch):
 
     def __init__(self, actor, success=True, strength=None):
         """Initialize Spike."""
-        self._strength = strength
-        super().__init__(actor, success, target=None)
+        super().__init__(actor, success, target=None, strength=strength)
 
 
-class _AbstractReturn(_AbstractTouch):
-    """Abstract Return."""
-
-    def __init__(self, actor, success=True, strength=None):
-        """Initialize Abstract Return."""
-        self._strength = strength
-        super().__init__(actor, success, target=None)
-
-    @property
-    def strength(self):
-        """Return strength of Abstract Return."""
-        return self._strength
-
-
-class ServiceReturn(_AbstractReturn):
-    """Service Return."""
-
-    def __init__(self, actor, success=True, strength=None):
-        """Initialize Service Return."""
-        super().__init__(actor, success, strength)
-
-
-class DefensiveReturn(_AbstractReturn):
-    """Defensive Return."""
-
-    def __init__(self, actor, success=True, strength=None):
-        """Initialize Defensive Return."""
-        super().__init__(actor, success, strength)
+Service._next = Defense
+Defense._next = Set
+Set._next = Spike
+Spike._next = Defense
 
 
 class ActionList(object):
@@ -120,21 +111,28 @@ class ActionList(object):
     def parse(p1, p2, p3, p4, *actions):
         """Parse actions into AbstractTouches."""
         output = []
-        # add meta data like the score and stuff
+
+        same_team = ("1", "2")
+        other_team = ("3", "4")
+
+        def pmap(player):
+            out = {"1": p1, "2": p2, "3": p3, "4": p4}.get(player)
+            if out is None:
+                raise Exception("ERORORO")
+            else:
+                return out
 
         for point in actions:
-            current_point = []
-            current_step = 0
-            service = True
-            
-            current_team = ("1", "2")
-            other_team = ("3", "4")
-            current_player = None
-            
+            touch_list = []
+            touch = Service
+
+            focus = None
+
             action_deque = deque(point)
-            
-            next_obj = lambda: action_deque.popleft()
-            
+
+            def next_touch():
+                return action_deque.popleft()
+
             def verify_action_deque_empty(error_on=False):
                 if error_on:
                     if len(action_deque) == 0:
@@ -142,41 +140,141 @@ class ActionList(object):
                 else:
                     if len(action_deque) != 0:
                         raise Exception("FIX THIS")
-            
-            def swap_teams():
-                if current_player not in current_team:
-                    if current_player not in other_team:
+
+            def set_focus(player):
+                global focus
+                global same_team
+                global other_team
+                focus = player
+
+                if focus not in same_team:
+                    if focus not in other_team:
                         raise Exception("FIX THIS")
                     else:
-                        current_team, other_team = other_team, current_team
-            
+                        same_team, other_team = other_team, same_team
+
+            def add_defense(target, strength=None):
+                touch_list.append(Defense(pmap(focus),
+                                          success=True,
+                                          target=pmap(target),
+                                          strength=strength))
+                set_focus(target)
+                global touch
+                touch = Set
+
+            def add_set(target, strength=None):
+                touch_list.append(Set(pmap(focus),
+                                      success=True,
+                                      target=pmap(target),
+                                      strength=strength))
+                set_focus(target)
+                global touch
+                touch = Spike
+
+            def add_spike(target, strength=None):
+                touch_list.append(Spike(pmap(focus),
+                                        success=True,
+                                        target=pmap(target),
+                                        strength=strength))
+                set_focus(target)
+                global touch
+                touch = Defense
+
             while len(action_deque) != 0:
-                if service:
-                    current_player = next_obj()
-                    
-                    # swap teams if necessary
-                    swap_teams()
-                    
-                    modifier = next_obj()
-                    if modifier == "a":
-                        target = next_obj()
-                        current_point.append(Service(current, success=True, target=target, is_ace=True))
+                if touch is Service:
+                    set_focus(next_touch())
+                    modifier = next_touch()
+                    if modifier == "n":
+                        touch_list.append(Service(pmap(focus),
+                                                  success=False))
+                        verify_action_deque_empty(error_on=False)
+                    elif modifier == "a":
+                        target = next_touch()
+                        if target in other_team:
+                            touch_list.append(Service(pmap(focus),
+                                                      success=True,
+                                                      target=pmap(target),
+                                                      is_ace=True))
+                        else:
+                            raise Exception("FIX THIS")
                         verify_action_deque_empty(error_on=False)
                     elif modifier in other_team:
-                        current_point.append(Service(current, success=True, target=modifier))
-                        current_player = modifier
-                    elif modifier == "n":
-                        current_point.append(Service(current, success=False))
-                        verify_action_deque_empty(error_on=False)
+                        touch_list.append(Service(pmap(focus),
+                                                  success=True,
+                                                  target=pmap(modifier)))
+                        set_focus(modifier)
+                        touch = Defense
                     else:
                         raise Exception("FIX THIS")
-                    service = False
+
                 else:
-                    pass
-            
-            output.append(current_point)
-                    
-                        
+                    modifier = next_touch()
+
+                    if modifier == "n":
+                        clz = Defense if touch is Defense else Spike
+                        touch_list.append(clz(pmap(focus), success=False))
+                        verify_action_deque_empty(error_on=False)
+                    elif modifier == "p":
+                        touch_list.append(Spike(pmap(focus), success=True))
+                        verify_action_deque_empty(error_on=False)
+
+                    if touch is Defense or touch is Set:
+                        if modifier in ("s", "w"):
+                            target = next_touch()
+                            if target in same_team or target in other_team:
+                                if target in other_team:
+                                    touch = Spike
+                                touch_list.append(touch(pmap(focus),
+                                                        success=True,
+                                                        target=pmap(target),
+                                                        strength=modifier))
+                                set_focus(target)
+                                touch = touch.next
+                            else:
+                                raise Exception("FIX THIS")
+
+                        elif modifier in same_team or modifier in other_team:
+                            if modifier in other_team:
+                                touch = Spike
+                            touch_list.append(touch(pmap(focus),
+                                                    success=True,
+                                                    target=pmap(modifier)))
+                            set_focus(target)
+                            touch = touch.next
+                        elif modifier == "e":
+                            raise NotImplemented("FIX THIS")
+                        else:
+                            raise Exception("FIX THIS")
+
+                    elif touch is Spike:
+                        if modifier in ("s", "w"):
+                            target = next_touch()
+                            if target in other_team:
+                                touch_list.append(touch(pmap(focus),
+                                                        success=True,
+                                                        target=pmap(target),
+                                                        strength=modifier))
+                                set_focus(target)
+                                touch = touch.next
+                            else:
+                                raise Exception("FIX THIS")
+
+                        elif modifier in other_team:
+                            touch_list.append(touch(pmap(focus),
+                                                    success=True,
+                                                    target=pmap(modifier)))
+                            set_focus(target)
+                            touch = touch.next
+
+                        elif modifier == "e":
+                            raise NotImplemented("FIX THIS")
+                        else:
+                            raise Exception("FIX THIS")
+
+                    else:
+                        pass
+
+            output.append(touch_list)
 
         return output
 
