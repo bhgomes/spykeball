@@ -11,7 +11,7 @@ class Player(util.UIDObject):
         """Initialize player with a name."""
         super().__init__(object_uid)
         self._name = name
-        self._stats = dict()
+        self._stats = {}
 
     def __repr__(self):
         """Representation of the Player Object."""
@@ -46,6 +46,7 @@ class Player(util.UIDObject):
         else:
             raise InvalidGameException("Game already Registered.", game)
 
-    def save(self, file):
+    def save(self, filename):
         """Save a player's progress in a file."""
+        # use pickle
         pass
