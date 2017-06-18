@@ -7,6 +7,10 @@ window.onload = function() {
 };
 
 document.querySelector('.youtubeUrl').addEventListener('keypress', function(event) {
+    if(this.classList.contains('invalid')) {
+        document.querySelector('.xout').remove();
+        this.classList.remove('invalid');
+    }
     if(event.keyCode == 13) {
         getVid(this.value);
     }
