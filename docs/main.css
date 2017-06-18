@@ -1,0 +1,272 @@
+* {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    border: none;
+    padding: 0;
+}
+
+*:focus {
+    outline: none;
+}
+
+:root {
+    --vid-width: 1260px;
+    --vid-height: 708.75px;
+    --margin: 20px;
+    --input-height: 70px;
+}
+
+body {
+    height: 100vh;
+    background: #fff;
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
+/*----------------------------------------------------------------*/
+
+nav {
+    position: relative;
+    height: 25px;
+    width: 100%;
+    background: #fff;
+    border-bottom: 1px solid #f1f1f1;
+    text-align: center;
+    padding: 10px 0;
+}
+
+nav h2 {
+    display: inline-block;
+    font-weight: 700;
+    line-height: 25px;
+    color: #ccc;
+    width: 100px;
+}
+
+nav i {
+    display: inline-block;
+    float: right;
+    margin-right: var(--margin);
+    color: #2d2d2d;
+}
+
+/*----------------------------------------------------------------*/
+
+.left {
+    position: absolute;
+    left: var(--margin);
+    margin-top: var(--margin);
+}
+
+.youtubeBox {
+    display: block;
+    position: relative;
+    top: 0;
+    left: calc(50% - (var(--vid-width) / 2));
+    width: var(--vid-width);
+    height: var(--vid-height);
+    background: #f1f1f1;
+}
+
+.youtubeInput {
+    position: relative;
+    top: calc((var(--vid-height) / 2) - 112.5px);
+    left: calc((var(--vid-width) / 2) - 200px);
+    width: 400px;
+    height: 225px;
+    text-align: center;
+    padding: 20px 0 0 0;
+}
+
+.youtubeInput label {
+    color: #000;
+    font-size: 24px;
+}
+
+.youtubeInput .youlogo {
+    display: block;
+    font-size: 48px;
+    height: 48px;
+    overflow: hidden;
+    color: #e52d27;
+}
+
+.youtubeInput .xout {
+    position: absolute;
+    width: 34px;
+    font-size: 24px;
+    top: 125px;
+    margin-left: -34px;
+    color: #fff;
+    background: #ec5151;
+    cursor: pointer;
+}
+
+.youtubeUrl {
+    width: 300px;
+    height: 40px;
+    font-size: 15px;
+    background: #fff;
+    border-radius: 4px;
+    margin-top: var(--margin);
+    padding: 0 10px;
+    transition: border-color 300ms;
+}
+
+.youtubeInput::after {
+    content: "";
+    display: block;
+    width: 320px;
+    height: 2px;
+    margin: 10px 40px;
+    background: #2d2d2d;
+}
+
+.invalid {
+    background: #ec5151;
+    color: #fff;
+    box-shadow: none;
+}
+
+.youtubeVid {
+    width: 100%;
+    height: 100%;
+}
+
+.text {
+    display: block;
+    position: relative;
+    top: 0;
+    left: calc(50% - (var(--vid-width) / 2));
+    margin-top: var(--margin);
+    width: var(--vid-width);
+}
+
+.textField {
+    display: inline-block;
+    float: left;
+    width: calc(var(--vid-width) - var(--input-height));
+    height: var(--input-height);
+    font-size: 40px;
+    text-align: center;
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+    background: #f4f4f4;
+}
+
+.enter {
+    display: inline-block;
+    float: right;
+    height: var(--input-height);
+    width: var(--input-height);
+    background: #ffd704;
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+    cursor: pointer;
+}
+
+.enter .material-icons {
+    color: #fff;
+    font-size: 48px;
+    margin-top: 5px;
+}
+
+/*----------------------------------------------------------------*/
+
+.right {
+    position: absolute;
+    right: var(--margin);
+    width: calc(100% - var(--vid-width) - (3 * var(--margin)) - 20px);
+    height: calc(var(--vid-height) + var(--input-height) + var(--margin) - 20px);
+    margin-top: var(--margin);
+    background: #f1f1f1;
+    border: 10px solid #f1f1f1;
+    overflow: hidden;
+}
+
+.savedTextArea {
+    height: calc(var(--vid-height) - 10px);
+}
+
+.savedTextArea h2 {
+    color: #ccc;
+    text-align: center;
+    line-height: calc(var(--vid-height) - 10px);
+    font-weight: 100;
+}
+
+.savedText {
+    width: 100%;
+    max-height:  calc(var(--vid-height) - 10px);
+    list-style-type: none;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.savedText li {
+    height: 50px;
+    line-height: 50px;
+    text-align: center;
+    background: #fff;
+    margin-bottom: 5px;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.savedText li b {
+    display: inline-block;
+    font-weight: 400;
+    max-width: calc(100% - 120px);
+    background: #fff;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.savedText li i {
+    display: inline-block;
+    line-height: 50px;
+    padding: 0 13px;
+    background: #fff;
+    cursor: pointer;
+}
+
+.savedText li .type {
+    float: left;
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+}
+
+.savedText li .clear {
+    float: right;
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+}
+
+/*----------------------------------------------------------------*/
+
+.bottom_BTNS {
+    display: flex;
+    display: -webkit-flex;
+    height: calc(var(--input-height) - 10px);
+    margin-top: var(--margin);
+    background: #fff;
+}
+
+.bottom_BTNS button {
+    flex: 1;
+    -webkit-flex: 1;
+    color: #fff;
+    cursor: pointer;
+}
+
+.reset {
+    background: #ff5a44;
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+}
+
+.download {
+    background: #6ecc76;
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+}
