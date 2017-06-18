@@ -2,12 +2,15 @@
 
 from abc import ABCMeta, abstractmethod
 
-from spykeball.core import util
+from spykeball.core import io
+# from spykeball.core import util
 from spykeball.core.exception import InvalidPlayerException
 from spykeball.touch import Defense, Set, Spike, Service
 
+# resolve metaclass conflict then add util.UIDClass
 
-class StatModel(util.JSONSerializable, metaclass=ABCMeta):
+
+class StatModel(io.JSONSerializable, metaclass=ABCMeta):
     """Interpret a game."""
 
     @staticmethod
@@ -16,16 +19,14 @@ class StatModel(util.JSONSerializable, metaclass=ABCMeta):
         """Perform the stat calculations and register player stat."""
         return {"p1": None, "p2": None, "p3": None, "p4": None}
 
-    def to_json(self):
+    @classmethod
+    def to_json(cls):
         """Encode the object into valid JSON."""
-        return {"class": self.__name__}
+        return {"UID": None, "name": cls.__name__}
 
-    def from_json(self, s):
+    @classmethod
+    def from_json(cls, s):
         """Decode the object from valid JSON."""
-        return None
-
-
-# class FourPartModel(StatModel): pass
 
 
 class Model1(StatModel):
@@ -150,3 +151,7 @@ class Model1(StatModel):
 
 class DefaultStatModel(Model1):
     """The Default Stat Model."""
+
+
+class StatModelRegister(object):
+    """Return a StatModel from the Name."""
