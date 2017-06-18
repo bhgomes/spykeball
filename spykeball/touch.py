@@ -2,7 +2,7 @@
 
 from collections import deque
 
-from spykeball.core import util
+from spykeball.core import io
 from spykeball.core.exception import (
     InvalidPlayerException,
     InvalidTouchMapException
@@ -10,10 +10,10 @@ from spykeball.core.exception import (
 from spykeball.player import Player
 
 
-class _AbstractTouch(util.JSONSerializable):
+class _AbstractTouch(io.JSONSerializable):
     """Abstract definition of a Spikeball touch."""
 
-    next = None
+    _next = None
 
     def __init__(self, actor, success=True, target=None, strength=None):
         """Initialize Abstract Touch Class."""
@@ -42,7 +42,15 @@ class _AbstractTouch(util.JSONSerializable):
     def to_json(self):
         """Encode the object into valid JSON."""
         out = self.__dict__
-        out['class'] = self.__class__
+        for k, v in list(out.items()):
+            if k[0] == '_':
+                out[k[1:]] = out.pop(k)
+
+            if k == 'success' and v:
+                out.pop(k)
+            elif k in ('is_ace', 'strength') and not v:
+                out.pop(k)
+        out['touch'] = self.__class__.__name__
         return out
 
     def from_json(self, s):
@@ -96,16 +104,6 @@ class Service(_AbstractTouch):
         target = "" if self._target is None else " on " + str(self._target)
         return ("Ace(" if self._is_ace else "Service(") + \
             actor + success + target + ")"
-
-    def to_json(self):
-        """Encode the object into valid JSON."""
-        out = super().to_json()
-        out['class'] = "Ace" if self._is_ace else "Service"
-        return out
-
-    def from_json(self, s):
-        """Decode the object from valid JSON."""
-        return None
 
     @property
     def is_ace(self):
@@ -162,13 +160,13 @@ class Spike(_AbstractTouch):
         return self.__class__.__name__ + "(" + actor + success + target + ")"
 
 
-Service.next = Defense
-Defense.next = Set
-Set.next = Spike
-Spike.next = Defense
+Service._next = Defense
+Defense._next = Set
+Set._next = Spike
+Spike._next = Defense
 
 
-class ActionList(util.JSONSerializable):
+class ActionList(io.JSONSerializable):
     """List of actions."""
 
     def __init__(self, p1, p2, p3, p4, *actions):
@@ -377,7 +375,7 @@ class ActionList(util.JSONSerializable):
                                                  target=pmap(target),
                                                  strength=strength))
                             set_focus(target)
-                            touch = touch.next
+                            touch = touch._next
 
                         else:
                             raise InvalidTouchMapException(
@@ -416,17 +414,37 @@ class ActionList(util.JSONSerializable):
         """Return Player 1."""
         return self._p1
 
+    @p1.setter
+    def p1(self, new_p1):
+        """Set Player 1."""
+        self._p1 = new_p1
+
     @property
     def p2(self):
         """Return Player 2."""
         return self._p2
+
+    @p2.setter
+    def p2(self, new_p2):
+        """Set Player 2."""
+        self._p2 = new_p2
 
     @property
     def p3(self):
         """Return Player 3."""
         return self._p3
 
+    @p3.setter
+    def p3(self, new_p3):
+        """Set Player 3."""
+        self._p3 = new_p3
+
     @property
     def p4(self):
         """Return Player 4."""
         return self._p4
+
+    @p4.setter
+    def p4(self, new_p4):
+        """Set Player 4."""
+        self._p4 = new_p4

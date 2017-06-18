@@ -1,0 +1,19 @@
+{
+    "name": "Billy",
+    "stats": {
+        "G-566895-805717-357455": {
+            "stat": {
+                "total": 38.5,
+                "serving": 20.5,
+                "defense": 0.0,
+                "cleanliness": 18,
+                "hitting": 0.0
+            },
+            "model": {
+                "name": "DefaultStatModel",
+                "UID": null
+            }
+        }
+    },
+    "UID": "P-830348-390000"
+}

@@ -1,0 +1,81 @@
+{
+    "game": {
+        "class": "Game",
+        "UID": 0
+    },
+    "actionlist": [
+        "1343121p",
+        "143412n",
+        "3121p",
+        "234321s23w43p",
+        "4a1",
+        "4n",
+        "14342123431213w4n",
+        "1a3",
+        "13432w1s2p"
+    ],
+    "stats": {
+        "p1": {
+            "serving": 20.5,
+            "total": 38.5,
+            "cleanliness": 18,
+            "hitting": 0.0,
+            "defense": 0.0
+        },
+        "model": {
+            "class": "DefaultStatModel"
+        },
+        "p2": {
+            "serving": 15.0,
+            "total": 39.0,
+            "cleanliness": 13,
+            "hitting": 5.0,
+            "defense": 6.0
+        },
+        "p3": {
+            "serving": 15.0,
+            "total": 29.0,
+            "cleanliness": 14,
+            "hitting": 0.0,
+            "defense": 0.0
+        },
+        "p4": {
+            "serving": 13.0,
+            "total": 40.0001,
+            "cleanliness": 15,
+            "hitting": 6.6667,
+            "defense": 5.3334
+        }
+    },
+    "teams": {
+        "home": [
+            {
+                "class": "Player",
+                "UID": 83034839,
+                "name": "Billy"
+            },
+            {
+                "class": "Player",
+                "UID": 34924003,
+                "name": "Bobby"
+            }
+        ],
+        "away": [
+            {
+                "class": "Player",
+                "UID": 24950013,
+                "name": "Max"
+            },
+            {
+                "class": "Player",
+                "UID": 34939114,
+                "name": "Cole"
+            }
+        ]
+    },
+    "winner": "home",
+    "score": {
+        "home": 6,
+        "away": 3
+    }
+}

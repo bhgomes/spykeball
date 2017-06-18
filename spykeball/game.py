@@ -2,33 +2,28 @@
 
 import json
 
-from functools import reduce
-
+from spykeball.core import io
 from spykeball.core import util
 from spykeball.core.exception import InvalidGameException
 from spykeball.core.exception import InvalidPlayerException
+from spykeball.player import Player
 from spykeball.stat import DefaultStatModel
 from spykeball.touch import ActionList
 
 
-class Game(util.UIDObject, util.JSONSerializable):
+class Game(util.UIDObject, io.JSONSerializable):
     """Game Object."""
 
     def __init__(self, p1, p2, p3, p4,
                  stat_model=DefaultStatModel, *actions, object_uid=None):
         """Initialize Game Object."""
         super().__init__(object_uid)
-        self._p1 = p1
-        self._p2 = p2
-        self._p3 = p3
-        self._p4 = p4
-        self._players = {"p1": p1, "p2": p2, "p3": p3, "p4": p4}
-        self._teams = {"home": (p1, p2), "away": (p3, p4)}
+        self._build_teams(p1, p2, p3, p4)
         self._stat_model = stat_model
         self._game_played = False
         self._stats = {
             p1: None, p2: None, p3: None, p4: None,
-            'score': None, 'winner': None
+            'score': {'home': None, 'away': None}, 'winner': None
         }
         self._stats_calculated = False
         self._stats_saved = False
@@ -45,6 +40,15 @@ class Game(util.UIDObject, util.JSONSerializable):
         """Return length of the game."""
         return len(self._actionlist)
 
+    def _build_teams(self, p1, p2, p3, p4):
+        """Setup for building the teams in the Game."""
+        self._p1 = p1
+        self._p2 = p2
+        self._p3 = p3
+        self._p4 = p4
+        self._players = {"p1": p1, "p2": p2, "p3": p3, "p4": p4}
+        self._teams = {"home": (p1, p2), "away": (p3, p4)}
+
     def _verify_played_status(self, error_on=False):
         """Verify that the game is played or not."""
         if error_on:
@@ -60,14 +64,14 @@ class Game(util.UIDObject, util.JSONSerializable):
         """Set the ActionList object stored in the Game."""
         if len(touches) == 1 and isinstance(touches[0], ActionList):
             self._actionlist = touches[0]
-            self.reset()
+            self.resetTo(False)
         elif isinstance(touches, ActionList):
             self._actionlist = touches
-            self.reset()
+            self.resetTo(False)
         elif len(touches) != 0:
             self._actionlist = ActionList(
                 self._p1, self._p2, self._p3, self._p4, *touches)
-            self.reset()
+            self.resetTo(False)
 
     @property
     def stat_model(self):
@@ -206,13 +210,13 @@ class Game(util.UIDObject, util.JSONSerializable):
 
     def to_json(self):
         """Encode the object into valid JSON."""
-        return {"class": "Game", "UID": self.UID}
+        return {"UID": self.UID}
 
     def from_json(self, s):
         """Decode the object from valid JSON."""
         return None
 
-    def save(self, filepath, with_stats=True):
+    def save(self, fp, with_stats=True):
         """Save the Game data to a file."""
         self._verify_played_status(error_on=False)
 
@@ -236,23 +240,42 @@ class Game(util.UIDObject, util.JSONSerializable):
                               self._players}
             saved["stats"]["model"] = self._stat_model
 
-        with open(filepath, "w+") as file:
-            json.dump(
-                saved, file, default=util.JSONSerializable.serialize, indent=4)
+        io.save_json(fp, saved)
 
-    def load(self, filepath):
+    def load(self, fp, *delimeters, action_only=False):
         """Load the Game data from a file."""
         saved = {}
-        with open(filepath, "r+") as file:
-            saved = json.load(
-                reduce(lambda x, y: x + "\n" + y, file.readlines))
+        with open(fp, "r+") as file:
+            if action_only:
+                saved['actionlist'] = \
+                    [s for s in io.readsplit(file, ",", "\n", *delimeters)
+                     if s != '']
+                self.resetTo(False)
+            else:
+                saved = json.load(file)
+                self._build_teams(
+                    Player(saved['teams']['home'][0]),
+                    Player(saved['teams']['home'][1]),
+                    Player(saved['teams']['away'][0]),
+                    Player(saved['teams']['away'][1])
+                )
+                self._stat_model = saved['stats']['model']
+                self._stats[self._p1] = saved['stats'][self._p1]
+                self._stats[self._p2] = saved['stats'][self._p2]
+                self._stats[self._p3] = saved['stats'][self._p3]
+                self._stats[self._p4] = saved['stats'][self._p4]
+                self._stats['winner'] = saved['stats']['winner']
+                self._stats['score']['home'] = saved['stats']['score']['home']
+                self._stats['score']['away'] = saved['stats']['score']['away']
+                self.resetTo(True)
         self._actionlist = saved['actionlist']
+        print(saved)
 
-    def reset(self):
+    def resetTo(self, value):
         """Reset the game and recalls all scores from players."""
-        self._game_played = False
-        self._stats_calculated = False
-        self._stats_saved = False
+        self._game_played = value
+        self._stats_calculated = value
+        self._stats_saved = value
 
 
 class GameFile(object):
