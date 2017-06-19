@@ -11,6 +11,8 @@ environment:
 build: off
 
 install:
+    - "pip install --disable-pip-version-check --user --upgrade pip"
+    - "%CMD_IN_ENV% pip install -r dev-requirements.txt"
     - "%PYTHON%\\python.exe -m pip install wheel"
 
 test_script:
