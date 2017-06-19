@@ -5,5 +5,5 @@ a python statistics library for the game of [Spikeball®](https://spikeball.com)
 Players are evaluated based on their gameplay...
 
 ### LICENSE
-This software is licensed under the [MIT Open Source License](./LICENSE).  
+This software is licensed under the [MIT Open Source License](./LICENSE).
 Copyright 2017 Brandon Gomes, Adrian Gomes, and Max Model

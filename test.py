@@ -19,6 +19,8 @@ al2 = ActionList(p1, p2, p3, p4, *al.as_strings)
 
 al2.save('demo/sample/actions/action000.json')
 
-# g1 = Game(p1, p2, p3, p4, DefaultStatModel, al)
+g1 = Game(p1, p2, p3, p4, DefaultStatModel, al)
 
-print(al2)
+print(g1.away_team)
+
+p3.save('demo/sample/players/max.json', with_stats=False)

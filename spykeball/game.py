@@ -18,12 +18,14 @@ class Game(util.UIDObject, util.PlayerInterface, io.JSONSerializable):
     def __init__(self, p1, p2, p3, p4,
                  stat_model=DefaultStatModel, *actions, object_uid=None):
         """Initialize Game Object."""
-        super().__init__(p1, p2, p3, p4, object_uid=object_uid)
+        super().__init__(p1=p1, p2=p2, p3=p3, p4=p4, object_uid=object_uid)
+
         self._stat_model = stat_model
         self._stats = {
             p1: None, p2: None, p3: None, p4: None,
             'score': {'home': None, 'away': None}, 'winner': None
         }
+
         self._set_actionlist(actions)
 
     def __str__(self):

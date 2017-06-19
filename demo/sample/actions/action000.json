@@ -1,5 +1,4 @@
 {
-    "class": "ActionList",
     "strings": [
         "1343121p",
         "143412n",
@@ -11,310 +10,329 @@
         "1a3",
         "13432w1s2p"
     ],
+    "class": "ActionList",
+    "players": {
+        "p1": {
+            "UID": "P-830348-390000",
+            "name": "Billy"
+        },
+        "p3": {
+            "UID": "P-249500-130000",
+            "name": "Max"
+        },
+        "p4": {
+            "UID": "P-349391-140000",
+            "name": "Cole"
+        },
+        "p2": {
+            "UID": "P-349240-030000",
+            "name": "Bobby"
+        }
+    },
     "touches": [
         [
             {
+                "target": {
+                    "UID": "P-249500-130000",
+                    "name": "Max"
+                },
                 "touch": "Service",
                 "actor": {
-                    "name": "Billy",
-                    "UID": "P-830348-390000"
-                },
-                "target": {
-                    "name": "Max",
-                    "UID": "P-249500-130000"
+                    "UID": "P-830348-390000",
+                    "name": "Billy"
                 }
             },
             {
+                "target": {
+                    "UID": "P-349391-140000",
+                    "name": "Cole"
+                },
                 "touch": "Defense",
                 "actor": {
-                    "name": "Max",
-                    "UID": "P-249500-130000"
-                },
-                "target": {
-                    "name": "Cole",
-                    "UID": "P-349391-140000"
+                    "UID": "P-249500-130000",
+                    "name": "Max"
                 }
             },
             {
+                "target": {
+                    "UID": "P-249500-130000",
+                    "name": "Max"
+                },
                 "touch": "Set",
                 "actor": {
-                    "name": "Cole",
-                    "UID": "P-349391-140000"
-                },
+                    "UID": "P-349391-140000",
+                    "name": "Cole"
+                }
+            },
+            {
                 "target": {
-                    "name": "Max",
-                    "UID": "P-249500-130000"
+                    "UID": "P-830348-390000",
+                    "name": "Billy"
+                },
+                "touch": "Spike",
+                "actor": {
+                    "UID": "P-249500-130000",
+                    "name": "Max"
+                }
+            },
+            {
+                "target": {
+                    "UID": "P-349240-030000",
+                    "name": "Bobby"
+                },
+                "touch": "Defense",
+                "actor": {
+                    "UID": "P-830348-390000",
+                    "name": "Billy"
+                }
+            },
+            {
+                "target": {
+                    "UID": "P-830348-390000",
+                    "name": "Billy"
+                },
+                "touch": "Set",
+                "actor": {
+                    "UID": "P-349240-030000",
+                    "name": "Bobby"
                 }
             },
             {
                 "touch": "Spike",
                 "actor": {
-                    "name": "Max",
-                    "UID": "P-249500-130000"
-                },
-                "target": {
-                    "name": "Billy",
-                    "UID": "P-830348-390000"
-                }
-            },
-            {
-                "touch": "Defense",
-                "actor": {
-                    "name": "Billy",
-                    "UID": "P-830348-390000"
-                },
-                "target": {
-                    "name": "Bobby",
-                    "UID": "P-349240-030000"
-                }
-            },
-            {
-                "touch": "Set",
-                "actor": {
-                    "name": "Bobby",
-                    "UID": "P-349240-030000"
-                },
-                "target": {
-                    "name": "Billy",
-                    "UID": "P-830348-390000"
-                }
-            },
-            {
-                "touch": "Spike",
-                "actor": {
-                    "name": "Billy",
-                    "UID": "P-830348-390000"
+                    "UID": "P-830348-390000",
+                    "name": "Billy"
                 }
             }
         ],
         [
             {
+                "target": {
+                    "UID": "P-349391-140000",
+                    "name": "Cole"
+                },
                 "touch": "Service",
                 "actor": {
-                    "name": "Billy",
-                    "UID": "P-830348-390000"
-                },
-                "target": {
-                    "name": "Cole",
-                    "UID": "P-349391-140000"
+                    "UID": "P-830348-390000",
+                    "name": "Billy"
                 }
             },
             {
+                "target": {
+                    "UID": "P-249500-130000",
+                    "name": "Max"
+                },
                 "touch": "Defense",
                 "actor": {
-                    "name": "Cole",
-                    "UID": "P-349391-140000"
-                },
-                "target": {
-                    "name": "Max",
-                    "UID": "P-249500-130000"
+                    "UID": "P-349391-140000",
+                    "name": "Cole"
                 }
             },
             {
+                "target": {
+                    "UID": "P-349391-140000",
+                    "name": "Cole"
+                },
                 "touch": "Set",
                 "actor": {
-                    "name": "Max",
-                    "UID": "P-249500-130000"
-                },
-                "target": {
-                    "name": "Cole",
-                    "UID": "P-349391-140000"
+                    "UID": "P-249500-130000",
+                    "name": "Max"
                 }
             },
             {
+                "target": {
+                    "UID": "P-830348-390000",
+                    "name": "Billy"
+                },
                 "touch": "Spike",
                 "actor": {
-                    "name": "Cole",
-                    "UID": "P-349391-140000"
-                },
-                "target": {
-                    "name": "Billy",
-                    "UID": "P-830348-390000"
+                    "UID": "P-349391-140000",
+                    "name": "Cole"
                 }
             },
             {
+                "target": {
+                    "UID": "P-349240-030000",
+                    "name": "Bobby"
+                },
                 "touch": "Defense",
                 "actor": {
-                    "name": "Billy",
-                    "UID": "P-830348-390000"
-                },
-                "target": {
-                    "name": "Bobby",
-                    "UID": "P-349240-030000"
+                    "UID": "P-830348-390000",
+                    "name": "Billy"
                 }
             },
             {
                 "success": false,
                 "touch": "Spike",
                 "actor": {
-                    "name": "Bobby",
-                    "UID": "P-349240-030000"
+                    "UID": "P-349240-030000",
+                    "name": "Bobby"
                 }
             }
         ],
         [
             {
+                "target": {
+                    "UID": "P-830348-390000",
+                    "name": "Billy"
+                },
                 "touch": "Service",
                 "actor": {
-                    "name": "Max",
-                    "UID": "P-249500-130000"
-                },
-                "target": {
-                    "name": "Billy",
-                    "UID": "P-830348-390000"
+                    "UID": "P-249500-130000",
+                    "name": "Max"
                 }
             },
             {
+                "target": {
+                    "UID": "P-349240-030000",
+                    "name": "Bobby"
+                },
                 "touch": "Defense",
                 "actor": {
-                    "name": "Billy",
-                    "UID": "P-830348-390000"
-                },
-                "target": {
-                    "name": "Bobby",
-                    "UID": "P-349240-030000"
+                    "UID": "P-830348-390000",
+                    "name": "Billy"
                 }
             },
             {
+                "target": {
+                    "UID": "P-830348-390000",
+                    "name": "Billy"
+                },
                 "touch": "Set",
                 "actor": {
-                    "name": "Bobby",
-                    "UID": "P-349240-030000"
-                },
-                "target": {
-                    "name": "Billy",
-                    "UID": "P-830348-390000"
+                    "UID": "P-349240-030000",
+                    "name": "Bobby"
                 }
             },
             {
                 "touch": "Spike",
                 "actor": {
-                    "name": "Billy",
-                    "UID": "P-830348-390000"
+                    "UID": "P-830348-390000",
+                    "name": "Billy"
                 }
             }
         ],
         [
             {
+                "target": {
+                    "UID": "P-249500-130000",
+                    "name": "Max"
+                },
                 "touch": "Service",
                 "actor": {
-                    "name": "Bobby",
-                    "UID": "P-349240-030000"
-                },
-                "target": {
-                    "name": "Max",
-                    "UID": "P-249500-130000"
+                    "UID": "P-349240-030000",
+                    "name": "Bobby"
                 }
             },
             {
+                "target": {
+                    "UID": "P-349391-140000",
+                    "name": "Cole"
+                },
                 "touch": "Defense",
                 "actor": {
-                    "name": "Max",
-                    "UID": "P-249500-130000"
-                },
-                "target": {
-                    "name": "Cole",
-                    "UID": "P-349391-140000"
+                    "UID": "P-249500-130000",
+                    "name": "Max"
                 }
             },
             {
+                "target": {
+                    "UID": "P-249500-130000",
+                    "name": "Max"
+                },
                 "touch": "Set",
                 "actor": {
-                    "name": "Cole",
-                    "UID": "P-349391-140000"
-                },
-                "target": {
-                    "name": "Max",
-                    "UID": "P-249500-130000"
+                    "UID": "P-349391-140000",
+                    "name": "Cole"
                 }
             },
             {
+                "target": {
+                    "UID": "P-349240-030000",
+                    "name": "Bobby"
+                },
                 "touch": "Spike",
                 "actor": {
-                    "name": "Max",
-                    "UID": "P-249500-130000"
-                },
-                "target": {
-                    "name": "Bobby",
-                    "UID": "P-349240-030000"
+                    "UID": "P-249500-130000",
+                    "name": "Max"
                 }
             },
             {
+                "target": {
+                    "UID": "P-830348-390000",
+                    "name": "Billy"
+                },
                 "touch": "Defense",
                 "actor": {
-                    "name": "Bobby",
-                    "UID": "P-349240-030000"
-                },
-                "target": {
-                    "name": "Billy",
-                    "UID": "P-830348-390000"
+                    "UID": "P-349240-030000",
+                    "name": "Bobby"
                 }
             },
             {
+                "target": {
+                    "UID": "P-349240-030000",
+                    "name": "Bobby"
+                },
                 "strength": "s",
                 "touch": "Set",
                 "actor": {
-                    "name": "Billy",
-                    "UID": "P-830348-390000"
-                },
-                "target": {
-                    "name": "Bobby",
-                    "UID": "P-349240-030000"
+                    "UID": "P-830348-390000",
+                    "name": "Billy"
                 }
             },
             {
+                "target": {
+                    "UID": "P-249500-130000",
+                    "name": "Max"
+                },
                 "touch": "Spike",
                 "actor": {
-                    "name": "Bobby",
-                    "UID": "P-349240-030000"
-                },
-                "target": {
-                    "name": "Max",
-                    "UID": "P-249500-130000"
+                    "UID": "P-349240-030000",
+                    "name": "Bobby"
                 }
             },
             {
+                "target": {
+                    "UID": "P-349391-140000",
+                    "name": "Cole"
+                },
                 "strength": "w",
                 "touch": "Defense",
                 "actor": {
-                    "name": "Max",
-                    "UID": "P-249500-130000"
-                },
-                "target": {
-                    "name": "Cole",
-                    "UID": "P-349391-140000"
+                    "UID": "P-249500-130000",
+                    "name": "Max"
                 }
             },
             {
+                "target": {
+                    "UID": "P-249500-130000",
+                    "name": "Max"
+                },
                 "touch": "Set",
                 "actor": {
-                    "name": "Cole",
-                    "UID": "P-349391-140000"
-                },
-                "target": {
-                    "name": "Max",
-                    "UID": "P-249500-130000"
+                    "UID": "P-349391-140000",
+                    "name": "Cole"
                 }
             },
             {
                 "touch": "Spike",
                 "actor": {
-                    "name": "Max",
-                    "UID": "P-249500-130000"
+                    "UID": "P-249500-130000",
+                    "name": "Max"
                 }
             }
         ],
         [
             {
-                "is_ace": true,
-                "actor": {
-                    "name": "Cole",
-                    "UID": "P-349391-140000"
+                "target": {
+                    "UID": "P-830348-390000",
+                    "name": "Billy"
                 },
                 "touch": "Service",
-                "target": {
-                    "name": "Billy",
-                    "UID": "P-830348-390000"
+                "is_ace": true,
+                "actor": {
+                    "UID": "P-349391-140000",
+                    "name": "Cole"
                 }
             }
         ],
@@ -323,284 +341,266 @@
                 "success": false,
                 "touch": "Service",
                 "actor": {
-                    "name": "Cole",
-                    "UID": "P-349391-140000"
+                    "UID": "P-349391-140000",
+                    "name": "Cole"
                 }
             }
         ],
         [
             {
+                "target": {
+                    "UID": "P-349391-140000",
+                    "name": "Cole"
+                },
                 "touch": "Service",
                 "actor": {
-                    "name": "Billy",
-                    "UID": "P-830348-390000"
-                },
-                "target": {
-                    "name": "Cole",
-                    "UID": "P-349391-140000"
+                    "UID": "P-830348-390000",
+                    "name": "Billy"
                 }
             },
             {
+                "target": {
+                    "UID": "P-249500-130000",
+                    "name": "Max"
+                },
                 "touch": "Defense",
                 "actor": {
-                    "name": "Cole",
-                    "UID": "P-349391-140000"
-                },
-                "target": {
-                    "name": "Max",
-                    "UID": "P-249500-130000"
+                    "UID": "P-349391-140000",
+                    "name": "Cole"
                 }
             },
             {
+                "target": {
+                    "UID": "P-349391-140000",
+                    "name": "Cole"
+                },
                 "touch": "Set",
                 "actor": {
-                    "name": "Max",
-                    "UID": "P-249500-130000"
-                },
-                "target": {
-                    "name": "Cole",
-                    "UID": "P-349391-140000"
+                    "UID": "P-249500-130000",
+                    "name": "Max"
                 }
             },
             {
+                "target": {
+                    "UID": "P-349240-030000",
+                    "name": "Bobby"
+                },
                 "touch": "Spike",
                 "actor": {
-                    "name": "Cole",
-                    "UID": "P-349391-140000"
-                },
-                "target": {
-                    "name": "Bobby",
-                    "UID": "P-349240-030000"
+                    "UID": "P-349391-140000",
+                    "name": "Cole"
                 }
             },
             {
+                "target": {
+                    "UID": "P-830348-390000",
+                    "name": "Billy"
+                },
                 "touch": "Defense",
                 "actor": {
-                    "name": "Bobby",
-                    "UID": "P-349240-030000"
-                },
-                "target": {
-                    "name": "Billy",
-                    "UID": "P-830348-390000"
+                    "UID": "P-349240-030000",
+                    "name": "Bobby"
                 }
             },
             {
+                "target": {
+                    "UID": "P-349240-030000",
+                    "name": "Bobby"
+                },
                 "touch": "Set",
                 "actor": {
-                    "name": "Billy",
-                    "UID": "P-830348-390000"
-                },
-                "target": {
-                    "name": "Bobby",
-                    "UID": "P-349240-030000"
+                    "UID": "P-830348-390000",
+                    "name": "Billy"
                 }
             },
             {
+                "target": {
+                    "UID": "P-249500-130000",
+                    "name": "Max"
+                },
                 "touch": "Spike",
                 "actor": {
-                    "name": "Bobby",
-                    "UID": "P-349240-030000"
-                },
-                "target": {
-                    "name": "Max",
-                    "UID": "P-249500-130000"
+                    "UID": "P-349240-030000",
+                    "name": "Bobby"
                 }
             },
             {
+                "target": {
+                    "UID": "P-349391-140000",
+                    "name": "Cole"
+                },
                 "touch": "Defense",
                 "actor": {
-                    "name": "Max",
-                    "UID": "P-249500-130000"
-                },
-                "target": {
-                    "name": "Cole",
-                    "UID": "P-349391-140000"
+                    "UID": "P-249500-130000",
+                    "name": "Max"
                 }
             },
             {
+                "target": {
+                    "UID": "P-249500-130000",
+                    "name": "Max"
+                },
                 "touch": "Set",
                 "actor": {
-                    "name": "Cole",
-                    "UID": "P-349391-140000"
-                },
-                "target": {
-                    "name": "Max",
-                    "UID": "P-249500-130000"
+                    "UID": "P-349391-140000",
+                    "name": "Cole"
                 }
             },
             {
+                "target": {
+                    "UID": "P-830348-390000",
+                    "name": "Billy"
+                },
                 "touch": "Spike",
                 "actor": {
-                    "name": "Max",
-                    "UID": "P-249500-130000"
-                },
-                "target": {
-                    "name": "Billy",
-                    "UID": "P-830348-390000"
+                    "UID": "P-249500-130000",
+                    "name": "Max"
                 }
             },
             {
+                "target": {
+                    "UID": "P-349240-030000",
+                    "name": "Bobby"
+                },
                 "touch": "Defense",
                 "actor": {
-                    "name": "Billy",
-                    "UID": "P-830348-390000"
-                },
-                "target": {
-                    "name": "Bobby",
-                    "UID": "P-349240-030000"
+                    "UID": "P-830348-390000",
+                    "name": "Billy"
                 }
             },
             {
+                "target": {
+                    "UID": "P-830348-390000",
+                    "name": "Billy"
+                },
                 "touch": "Set",
                 "actor": {
-                    "name": "Bobby",
-                    "UID": "P-349240-030000"
-                },
-                "target": {
-                    "name": "Billy",
-                    "UID": "P-830348-390000"
+                    "UID": "P-349240-030000",
+                    "name": "Bobby"
                 }
             },
             {
+                "target": {
+                    "UID": "P-249500-130000",
+                    "name": "Max"
+                },
                 "touch": "Spike",
                 "actor": {
-                    "name": "Billy",
-                    "UID": "P-830348-390000"
-                },
-                "target": {
-                    "name": "Max",
-                    "UID": "P-249500-130000"
+                    "UID": "P-830348-390000",
+                    "name": "Billy"
                 }
             },
             {
+                "target": {
+                    "UID": "P-349391-140000",
+                    "name": "Cole"
+                },
                 "strength": "w",
                 "touch": "Defense",
                 "actor": {
-                    "name": "Max",
-                    "UID": "P-249500-130000"
-                },
-                "target": {
-                    "name": "Cole",
-                    "UID": "P-349391-140000"
+                    "UID": "P-249500-130000",
+                    "name": "Max"
                 }
             },
             {
                 "success": false,
                 "touch": "Spike",
                 "actor": {
-                    "name": "Cole",
-                    "UID": "P-349391-140000"
+                    "UID": "P-349391-140000",
+                    "name": "Cole"
                 }
             }
         ],
         [
             {
+                "target": {
+                    "UID": "P-249500-130000",
+                    "name": "Max"
+                },
+                "touch": "Service",
                 "is_ace": true,
                 "actor": {
-                    "name": "Billy",
-                    "UID": "P-830348-390000"
-                },
-                "touch": "Service",
-                "target": {
-                    "name": "Max",
-                    "UID": "P-249500-130000"
+                    "UID": "P-830348-390000",
+                    "name": "Billy"
                 }
             }
         ],
         [
             {
+                "target": {
+                    "UID": "P-249500-130000",
+                    "name": "Max"
+                },
                 "touch": "Service",
                 "actor": {
-                    "name": "Billy",
-                    "UID": "P-830348-390000"
-                },
-                "target": {
-                    "name": "Max",
-                    "UID": "P-249500-130000"
+                    "UID": "P-830348-390000",
+                    "name": "Billy"
                 }
             },
             {
+                "target": {
+                    "UID": "P-349391-140000",
+                    "name": "Cole"
+                },
                 "touch": "Defense",
                 "actor": {
-                    "name": "Max",
-                    "UID": "P-249500-130000"
-                },
-                "target": {
-                    "name": "Cole",
-                    "UID": "P-349391-140000"
+                    "UID": "P-249500-130000",
+                    "name": "Max"
                 }
             },
             {
+                "target": {
+                    "UID": "P-249500-130000",
+                    "name": "Max"
+                },
                 "touch": "Set",
                 "actor": {
-                    "name": "Cole",
-                    "UID": "P-349391-140000"
-                },
-                "target": {
-                    "name": "Max",
-                    "UID": "P-249500-130000"
+                    "UID": "P-349391-140000",
+                    "name": "Cole"
                 }
             },
             {
+                "target": {
+                    "UID": "P-349240-030000",
+                    "name": "Bobby"
+                },
                 "touch": "Spike",
                 "actor": {
-                    "name": "Max",
-                    "UID": "P-249500-130000"
-                },
-                "target": {
-                    "name": "Bobby",
-                    "UID": "P-349240-030000"
+                    "UID": "P-249500-130000",
+                    "name": "Max"
                 }
             },
             {
+                "target": {
+                    "UID": "P-830348-390000",
+                    "name": "Billy"
+                },
                 "strength": "w",
                 "touch": "Defense",
                 "actor": {
-                    "name": "Bobby",
-                    "UID": "P-349240-030000"
-                },
-                "target": {
-                    "name": "Billy",
-                    "UID": "P-830348-390000"
+                    "UID": "P-349240-030000",
+                    "name": "Bobby"
                 }
             },
             {
+                "target": {
+                    "UID": "P-349240-030000",
+                    "name": "Bobby"
+                },
                 "strength": "s",
                 "touch": "Set",
                 "actor": {
-                    "name": "Billy",
-                    "UID": "P-830348-390000"
-                },
-                "target": {
-                    "name": "Bobby",
-                    "UID": "P-349240-030000"
+                    "UID": "P-830348-390000",
+                    "name": "Billy"
                 }
             },
             {
                 "touch": "Spike",
                 "actor": {
-                    "name": "Bobby",
-                    "UID": "P-349240-030000"
+                    "UID": "P-349240-030000",
+                    "name": "Bobby"
                 }
             }
         ]
-    ],
-    "players": {
-        "p3": {
-            "name": "Max",
-            "UID": "P-249500-130000"
-        },
-        "p1": {
-            "name": "Billy",
-            "UID": "P-830348-390000"
-        },
-        "p2": {
-            "name": "Bobby",
-            "UID": "P-349240-030000"
-        },
-        "p4": {
-            "name": "Cole",
-            "UID": "P-349391-140000"
-        }
-    }
+    ]
 }

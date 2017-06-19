@@ -63,3 +63,7 @@ class JSONSerializable(metaclass=ABCMeta):
         """Load JSON data into a JSONSerializable Structure."""
         with open(fp, "r+") as file:
             return cls.from_json(json.load(file), *args, **kwargs)
+
+
+class Serializable(metaclass=ABCMeta):
+    """Objects that can be saved to files."""

@@ -9,7 +9,7 @@ class UIDObject(object):
 
     __obj_uid_list = []
 
-    def __init__(self, object_uid=None):
+    def __init__(self, object_uid=None, **kwargs):
         """Create the object_uid."""
         self.__object_uid = object_uid
 
@@ -19,6 +19,7 @@ class UIDObject(object):
         else:
             self.__object_uid = self.generate_uid(seed=object_uid)
         self.__obj_uid_list.append(self.__object_uid)
+        super().__init__(**kwargs)
 
     @property
     def UID(self):
@@ -93,11 +94,12 @@ class UIDObject(object):
 class PlayerInterface(object):
     """Implements gets and sets for each player."""
 
-    def __init__(self, p1, p2, p3, p4):
+    def __init__(self, p1, p2, p3, p4, **kwargs):
         """Add each player to the Interface."""
         self.players = p1, p2, p3, p4
         self._players_set = p1 and p2 and p3 and p4
         # use ^ to auto update
+        super().__init__(**kwargs)
 
     @property
     def p1(self):
