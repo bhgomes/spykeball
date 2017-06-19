@@ -5,9 +5,10 @@ branches:
         - master
 
 environment:
-
     matrix:
         - PYTHON: "C:\\Python36-x64"
+
+build: off
 
 install:
     - "%PYTHON%\\python.exe -m pip install wheel"
