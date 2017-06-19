@@ -4,30 +4,21 @@ machine:
         PY_VERSIONS: "3.6"
 
 dependencies:
-    cache_directories:
-        - "$HOME/miniconda"
-
     pre:
         - cd ~;
         - rm -rf ~/.pyenv;
         - rm -rf ~/virtualenvs;
         - >
           if [ ! -d "$HOME/miniconda" ]; then
-            echo "Setting up conda";
             wget -q http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O ~/miniconda.sh;
             chmod +x ~/miniconda.sh;
             ~/miniconda.sh -b -p $HOME/miniconda;
             conda update --yes --quiet conda;
             conda create -n circleenv --yes pip python=3.6 pip pyqt qt setuptools;
             sed -i "s/ENABLE_USER_SITE = .*/ENABLE_USER_SITE = False/g" $HOME/miniconda/envs/circleenv/lib/python3.6/site.py;
-          else
-            echo "Conda already set up.";
           fi;
         - ls -al $HOME/miniconda;
         - ls -al $HOME/miniconda/bin;
-        - echo $PATH;
-        - which python;
-        - which pip;
         - pip install -r requirements.txt
 
 test:
