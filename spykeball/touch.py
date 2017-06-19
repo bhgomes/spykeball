@@ -1,5 +1,6 @@
 """Touch Classes."""
 
+from copy import deepcopy
 from collections import deque
 
 from spykeball.core import io
@@ -26,31 +27,29 @@ class _AbstractTouch(io.JSONSerializable):
 
     def __str__(self):
         """String representation of the Touch Object."""
-        actor = str(self._actor)
-
-        success = ""
-
+        success = "unsuccessful"
         if self._success:
             if self._strength == "s":
-                success = " strong"
+                success = "strong"
             elif self._strength == "w":
-                success = " weak"
-        else:
-            success = " unsuccessful"
+                success = "weak"
 
-        target = "" if self._target is None else " to " + str(self._target)
-        return self.__class__.__name__ + "(" + actor + success + target + ")"
+        return "{}({} {}{})".format(
+            self.__class__.__name__,
+            self._actor,
+            success,
+            ("" if self._target is None else " to " + str(self._target)))
 
     def to_json(self):
         """Encode the object into valid JSON."""
-        out = self.__dict__
+        out = deepcopy(self.__dict__)
         for k, v in list(out.items()):
             if k[0] == '_':
                 out[k[1:]] = out.pop(k)
 
             if k[1:] == 'success' and v:
                 out.pop(k[1:])
-            elif k[1:] in ('is_ace', 'strength') and not v:
+            elif k[1:] in ('is_ace', 'strength', 'target') and not v:
                 out.pop(k[1:])
         out['touch'] = self.__class__.__name__
         return out
@@ -92,19 +91,18 @@ class Service(_AbstractTouch):
 
     def __str__(self):
         """String representation of the Touch Object."""
-        actor = str(self._actor)
-
-        success = " unsuccessful"
-
+        success = "unsuccessful"
         if self._success:
             if self._strength == "s":
-                success = " strong"
+                success = "strong"
             elif self._strength == "w":
-                success = " weak"
+                success = "weak"
 
-        target = "" if self._target is None else " on " + str(self._target)
-        return ("Ace(" if self._is_ace else "Service(") + \
-            actor + success + target + ")"
+        return "{}({} {}{})".format(
+            "Ace" if self._is_ace else "Service",
+            self._actor,
+            success,
+            ("" if self._target is None else " to " + str(self._target)))
 
     @property
     def is_ace(self):
@@ -123,24 +121,20 @@ class Set(_AbstractTouch):
 class Spike(_AbstractTouch):
     """Spike."""
 
-    def __init__(self, actor, success=True, target=None, strength=None):
-        """Initialize Spike."""
-        super().__init__(actor, success, target, strength)
-
     def __str__(self):
         """String representation of the Spike Object."""
-        actor = str(self._actor)
-
-        success = " unsuccessful"
-
+        success = "unsuccessful"
         if self._success:
             if self._strength == "s":
-                success = " strong"
+                success = "strong"
             elif self._strength == "w":
-                success = " weak"
+                success = "weak"
 
-        target = "" if self._target is None else " on " + str(self._target)
-        return self.__class__.__name__ + "(" + actor + success + target + ")"
+        return "{}({} {}{})".format(
+            self.__class__.__name__,
+            self._actor,
+            success,
+            ("" if self._target is None else " on " + str(self._target)))
 
 
 Service._next = Defense
