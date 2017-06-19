@@ -1,7 +1,8 @@
 """Spykeball IO Module."""
 
+import json
+
 from abc import ABCMeta, abstractmethod
-from json import dump
 from spykeball.core import util
 
 
@@ -28,15 +29,21 @@ def readsplit(fp, *delimeters, buffer_size=4096):
         buffer = lines[-1]
 
 
+def ext_matches(fp, *ext):
+    """Return true if filename ends with any of the extensions given."""
+    return fp.lower().endswith(ext)
+
+
 class JSONSerializable(metaclass=ABCMeta):
     """Creates a JSON Serializable Object."""
 
     @abstractmethod
-    def to_json(self):
+    def to_json(self, *args, **kwargs):
         """Encode the object into valid JSON."""
 
+    @classmethod
     @abstractmethod
-    def from_json(self, s):
+    def from_json(cls, data, *args, **kwargs):
         """Decode the object from valid JSON."""
 
     def __repr__(self):
@@ -49,18 +56,10 @@ class JSONSerializable(metaclass=ABCMeta):
             return o.to_json(*args, **kwargs) if o is self else o.to_json()
 
         with open(fp, "w+") as file:
-            dump(self, file, default=serializer, indent=4)
+            json.dump(self, file, default=serializer, indent=4)
 
     @classmethod
     def load(cls, fp, *args, **kwargs):
         """Load JSON data into a JSONSerializable Structure."""
-        # use from_json function
-
-
-# def save_json(fp, obj, *args, **kwargs):
-#     """Save JSON data using JSONSerializable Structure."""
-#     def serializer(o):
-#         return o.to_json(*args, **kwargs) if o is obj else o.to_json()
-#
-#     with open(fp, "w+") as file:
-#         dump(obj, file, default=serializer, indent=4)
+        with open(fp, "r+") as file:
+            return cls.from_json(json.load(file), *args, **kwargs)

@@ -3,15 +3,26 @@
 from abc import ABCMeta, abstractmethod
 
 from spykeball.core import io
-# from spykeball.core import util
-from spykeball.core.exception import InvalidPlayerException
+from spykeball.core.exception import (
+    PlayerException,
+    JSONKeyError,
+)
 from spykeball.touch import Defense, Set, Spike, Service
-
-# resolve metaclass conflict then add util.UIDClass
 
 
 class StatModel(io.JSONSerializable, metaclass=ABCMeta):
     """Interpret a game."""
+
+    __stat_model_registry = {}
+
+    def __new__(cls, name, bases, attr):
+        """Add class to the StatModel registry after creation."""
+        model = StatModel.__stat_model_registry.get(name)
+        if model is None:
+            StatModel.__stat_model_registry[name] = cls
+        else:
+            raise NameError("No two StatModels can have the same name.", name)
+        return super().__new__(name, bases, attr)
 
     @staticmethod
     @abstractmethod
@@ -25,8 +36,20 @@ class StatModel(io.JSONSerializable, metaclass=ABCMeta):
         return {"UID": None, "name": cls.__name__}
 
     @classmethod
-    def from_json(cls, s):
+    def from_json(cls, data):
         """Decode the object from valid JSON."""
+        model = None
+        if all(k in data for k in ('UID', 'name')):
+            model = StatModel.__stat_model_registry.get(data['name'])
+            if model is None:
+                raise NameError("Model not found.", data['name'])
+        else:
+            raise JSONKeyError(
+                "JSON file does not have valid keys. "
+                "Should include 'name' and 'UID'.",
+                ('UID', 'name'), data.keys())
+
+        return model
 
 
 class Model1(StatModel):
@@ -49,10 +72,9 @@ class Model1(StatModel):
             actions = action_list[player]
 
             if actions is None:
-                raise InvalidPlayerException(
-                    "Player is not part of the ActionList.",
-                    player,
-                    action_list)
+                raise PlayerException("Player is not part of the ActionList.",
+                                      player,
+                                      action_list)
 
             performed = actions.get("actor")
             recieved = actions.get("target")
