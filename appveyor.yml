@@ -12,7 +12,7 @@ build: off
 
 install:
     - "pip install --disable-pip-version-check --user --upgrade pip"
-    - "%CMD_IN_ENV% pip install -r requirements.txt"
+    - "%CMD_IN_ENV% pip install -r requirements.txt --download='.'"
     - "%PYTHON%\\python.exe -m pip install wheel"
 
 test_script:
