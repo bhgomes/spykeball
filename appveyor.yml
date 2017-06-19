@@ -7,12 +7,13 @@ branches:
 environment:
     matrix:
         - PYTHON: "C:\\Python36-x64"
+        - PYTHON: "C:\\Python36"
 
 build: off
 
 install:
     - "pip install --disable-pip-version-check --user --upgrade pip"
-    - "%CMD_IN_ENV% pip install -r requirements.txt --download='.'"
+    - "%CMD_IN_ENV% pip install -r requirements.txt --allow-external PyQt5"
     - "%PYTHON%\\python.exe -m pip install wheel"
 
 test_script:
