@@ -1,20 +1,12 @@
-spykeball
-=========
+spykeball |Travis Status| |Appveyor Status| |CircleCI Status|
+=============================================================
 
 a python statistics library for the game of `Spikeball®`_
-
-Project Status
---------------
-
-
-Build Status
-____________
-
-|Travis Status| |Appveyor Status| |CircleCI Status|
 
 Statistical Model
 -----------------
 Players are evaluated based on their gameplay...
+
 
 LICENSE
 -------
