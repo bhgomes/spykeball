@@ -1,5 +1,7 @@
 machine:
     environment:
+        PATH: /home/ubuntu/miniconda2/bin:$PATH
+        TEST_CI: "True"
         PY_VERSIONS: "3.6"
         CONDA_DEPENDENCIES: "pyqt=5.*"
 
