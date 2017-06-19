@@ -14,13 +14,96 @@
     --vid-height: 708.75px;
     --margin: 20px;
     --input-height: 70px;
+    --block-color: #fff;
+    --feild-color: #eee;
 }
 
 body {
     height: 100vh;
-    background: #fff;
+    background: #f9f9f9;
     overflow-x: hidden;
     overflow-y: scroll;
+}
+
+/*----------------------------------------------------------------*/
+
+.landing {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: #fff;
+}
+
+.landingTitle {
+    font-size: 20vw;
+    text-align: center;
+    margin-top: 200px;
+    font-weight: 400;
+    color: #1C1C1D;
+    background: none;
+    text-shadow: 0.5vw 0.5vw #eee;
+    transition: margin-top 3000ms ease;
+}
+
+.landingTitle .py {
+    color: #000;
+    padding-bottom: 12px;
+}
+
+canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+}
+
+.loginBox {
+    position: fixed;
+    height: 100vh;
+    text-align: center;
+    background: #000;
+    transition: top 3000ms ease;
+    z-index: 2;
+}
+
+.login .loginBTN {
+    font-size: 1.3vw;
+    margin-top: 4vh;
+    text-align: center;
+    color: #000;
+    padding: 1.2vh 5vw;
+    border-radius: 2px;
+    font-weight: 700;
+    background: #ffd704;
+    cursor: pointer;
+    transition: opacity 300ms ease;
+}
+
+.login .loginArea {
+    position: fixed;
+    top: calc(50% - 37.5vh);
+    left: 20vw;
+    height: 75vh;
+    width: 0;
+    background: #ffd742;
+    box-shadow: 0.5vw 0.5vw #eee;
+    transition: all 3000ms 3000ms ease;
+}
+
+/*----------------------------------------------------------------*/
+
+.fourO {
+    background: #fff;
+    line-height: 90vh;
+    text-align: center;
+}
+
+.four {
+    font-size: 30vw;
+    color: #000;
+    text-shadow: 0.75vw 0.75vw #eee;
 }
 
 /*----------------------------------------------------------------*/
@@ -29,18 +112,21 @@ nav {
     position: relative;
     height: 25px;
     width: 100%;
-    background: #fff;
+    background: var(--block-color);
     border-bottom: 1px solid #f1f1f1;
     text-align: center;
     padding: 10px 0;
 }
 
-nav h2 {
+nav a {
     display: inline-block;
     font-weight: 700;
     line-height: 25px;
     color: #ccc;
     width: 100px;
+    text-decoration: none;
+    font-size: 1.5em;
+    cursor: pointer;
 }
 
 nav i {
@@ -65,7 +151,8 @@ nav i {
     left: calc(50% - (var(--vid-width) / 2));
     width: var(--vid-width);
     height: var(--vid-height);
-    background: #f1f1f1;
+    background: var(--block-color);
+    box-shadow: 2px 2px 5px 2px #eee;
 }
 
 .youtubeInput {
@@ -91,22 +178,11 @@ nav i {
     color: #e52d27;
 }
 
-.youtubeInput .xout {
-    position: absolute;
-    width: 34px;
-    font-size: 24px;
-    top: 125px;
-    margin-left: -34px;
-    color: #fff;
-    background: #ec5151;
-    cursor: pointer;
-}
-
 .youtubeUrl {
     width: 300px;
     height: 40px;
     font-size: 15px;
-    background: #fff;
+    background: var(--feild-color);
     border-radius: 4px;
     margin-top: var(--margin);
     padding: 0 10px;
@@ -123,9 +199,19 @@ nav i {
 }
 
 .invalid {
-    background: #ec5151;
+    background: #fa6274;
     color: #fff;
     box-shadow: none;
+}
+
+.youtubeInput .xout {
+    position: relative;
+    width: 34px;
+    top: 7px;
+    margin-left: -37px;
+    color: #fff;
+    background: #fa6274;
+    cursor: pointer;
 }
 
 .youtubeVid {
@@ -140,6 +226,9 @@ nav i {
     left: calc(50% - (var(--vid-width) / 2));
     margin-top: var(--margin);
     width: var(--vid-width);
+    height: 70px;
+    border-radius: 3px;
+    box-shadow: 2px 2px 5px 2px #eee;
 }
 
 .textField {
@@ -151,7 +240,12 @@ nav i {
     text-align: center;
     border-top-left-radius: 3px;
     border-bottom-left-radius: 3px;
-    background: #f4f4f4;
+    background: var(--block-color);
+}
+
+.textField::placeholder {
+    color: #ccc;
+    opacity: 1;
 }
 
 .enter {
@@ -179,9 +273,10 @@ nav i {
     width: calc(100% - var(--vid-width) - (3 * var(--margin)) - 20px);
     height: calc(var(--vid-height) + var(--input-height) + var(--margin) - 20px);
     margin-top: var(--margin);
-    background: #f1f1f1;
-    border: 10px solid #f1f1f1;
+    background: var(--block-color);
+    border: 10px solid var(--block-color);
     overflow: hidden;
+    box-shadow: 2px 2px 5px 2px #eee;
 }
 
 .savedTextArea {
@@ -207,7 +302,7 @@ nav i {
     height: 50px;
     line-height: 50px;
     text-align: center;
-    background: #fff;
+    background: var(--feild-color);
     margin-bottom: 5px;
     border-radius: 3px;
     overflow: hidden;
@@ -217,7 +312,7 @@ nav i {
     display: inline-block;
     font-weight: 400;
     max-width: calc(100% - 120px);
-    background: #fff;
+    background: var(--feild-color);
     overflow-x: auto;
     overflow-y: hidden;
 }
@@ -226,11 +321,11 @@ nav i {
     display: inline-block;
     line-height: 50px;
     padding: 0 13px;
-    background: #fff;
+    background: var(--feild-color);
     cursor: pointer;
 }
 
-.savedText li .type {
+.savedText li .timeStamp {
     float: left;
     border-top-left-radius: 3px;
     border-bottom-left-radius: 3px;
@@ -249,7 +344,6 @@ nav i {
     display: -webkit-flex;
     height: calc(var(--input-height) - 10px);
     margin-top: var(--margin);
-    background: #fff;
 }
 
 .bottom_BTNS button {
@@ -269,4 +363,42 @@ nav i {
     background: #6ecc76;
     border-top-right-radius: 3px;
     border-bottom-right-radius: 3px;
+}
+
+/*----------------------------------------------------------------*/
+
+@media (max-width: 1600px) {
+    :root {
+        --vid-width: 1120px;
+        --vid-height: 630px;
+    }
+}
+
+@media (max-width: 1400px) {
+    :root {
+        --vid-width: 840px;
+        --vid-height: 472.5px;
+    }
+}
+
+@media (max-width: 1100px) {
+    :root {
+        --vid-width: 630px;
+        --vid-height: 354.375px;
+        --margin: 15px;
+    }
+}
+
+@media (max-width: 900px) {
+    :root {
+        --vid-width: 504px;
+        --vid-height: 283.5px;
+        --margin: 10px;
+    }
+}
+
+@media (max-width: 1000px) and (max-height: 600px) {
+    .landingTitle {
+        margin-top: 100px;
+    }
 }
