@@ -2,4 +2,18 @@ platform: x64
 
 branches:
     only:
-      - master
+        - master
+
+environment:
+
+    matrix:
+        - PYTHON: "C:\\Python36-x64"
+
+install:
+    - "%PYTHON%\\python.exe -m pip install wheel"
+
+test_script:
+    - "%PYTHON%\\python.exe setup.py test"
+
+after_test:
+    - "%PYTHON%\\python.exe setup.py bdist_wheel"
