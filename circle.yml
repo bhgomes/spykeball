@@ -1,13 +1,31 @@
 machine:
-  environment:
-    PATH: "$HOME/miniconda/bin:$PATH"
-    PY_VERSIONS: "3.6"
-    CONDA_DEPENDENCIES: "pyqt qt"
+    environment:
+        PATH: "$HOME/miniconda/envs/circleenv/bin:$HOME/miniconda/bin:$PATH"
+        PY_VERSIONS: "3.6"
 
 dependencies:
-  override:
-    - PY_VERSIONS=($PY_VERSIONS) &&
-      TRAVIS_PYTHON_VERSION=${PY_VERSIONS[$CIRCLE_NODE_INDEX]} &&
-      echo -e "PYTHON = $TRAVIS_PYTHON_VERSION \n============" &&
-      conda install qt=5.* &&
-      pip install -r requirements.txt;
+    cache_directories:
+        - "$HOME/miniconda"
+
+    pre:
+        - cd ~;
+        - rm -rf ~/.pyenv;
+        - rm -rf ~/virtualenvs;
+        - >
+          if [ ! -d "$HOME/miniconda" ]; then
+            echo "Setting up conda";
+            wget -q http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O ~/miniconda.sh;
+            chmod +x ~/miniconda.sh;
+            ~/miniconda.sh -b -p $HOME/miniconda;
+            conda update --yes --quiet conda;
+            conda create -n circleenv --yes pip python=3.6 pip pyqt qt;
+            sed -i "s/ENABLE_USER_SITE = .*/ENABLE_USER_SITE = False/g" $HOME/miniconda/envs/circleenv/lib/python3.6/site.py;
+          else
+            echo "Conda already set up.";
+          fi;
+        - ls -al $HOME/miniconda;
+        - ls -al $HOME/miniconda/bin;
+        - echo $PATH;
+        - which python;
+        - which pip;
+        - pip install -r requirements.txt
