@@ -2,41 +2,58 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <title>spykeball</title>
-        <link href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet">
+        <title>Spykeball</title>
+        <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,700" rel="stylesheet">
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-        <link rel="stylesheet" href="main.css">
-        <link rel="stylesheet" href="sizing.css">
+        <link rel="stylesheet" href="css/main.css">
     </head>
     <body>
-        <nav>
-            <h2>spykeball</h2>
-            <i class="material-icons">&#xE865</i>
-        </nav>
-        <section class="left">
-            <div class="youtubeBox">
-                <div class="youtubeInput">
-                    <i class="material-icons youlogo">&#xE064</i>
-                    <label for="url">YouTube Video</label>
-                    <input class="youtubeUrl" type="text" name="url" placeholder="https://www.youtube.com/embed/"  value="" autocomplete="off">
-                    <!--https://www.youtube.com/embed/R-0hRAtdOP4-->
-                 </div>
+        <div class="landing">
+            <h1 class="landingTitle">s<b class="py">py</b>keball</h1>
+            <div class="login">
+                <div class="loginBox">
+                    <button class="loginBTN" type="button" onclick="openLogin()">Login</button>
+                </div>
+                <div class="loginArea"></div>
+                <script type="text/javascript">
+                    function openLogin() {
+                        var btn = document.querySelector('.loginBTN');
+                        btn.style.opacity = '0';
+
+                        var title = document.querySelector('.landingTitle');
+                        title.style.marginTop = '-100vh';
+
+                        var box = document.querySelector('.loginBox');
+                        box.style.height = '80vh';
+                        box.style.top = 'calc(50% - 40vh)';
+
+                        var loginArea = document.querySelector('.loginArea');
+                        loginArea.style.width = '60vw';
+                        loginArea.style.left = '15vw';
+
+
+                    }
+                </script>
             </div>
-            <div class="text">
-                <input class="textField" type="text" value="" placeholder="type here"  onkeypress="checkText(event)" autocomplete="off" autofocus>
-                <button class="enter" type="button" onclick="saveText(t.value)"><i class="material-icons">&#xE315</i></button>
-            </div>
-        </section>
-        <section class="right">
-            <div class="savedTextArea">
-                <h2>Play by Play</h2>
-                <ul class="savedText"></ul>
-            </div>
-            <div class="bottom_BTNS">
-                <button class="reset" type="button" onclick="reset()"><i class="material-icons">&#xE042</i></button>
-                <button class="download" onclick="download()"><i class="material-icons">&#xE2C4</i></button>
-            </div>
-        </section>
-        <script src="main.js" charset="utf-8"></script>
+            <script type="text/javascript">
+                var box = document.querySelector('.loginBox');
+
+                window.onload = function() {
+                    box.style.top = document.querySelector('.py').offsetTop +  document.querySelector('.py').offsetHeight + 'px';
+                    box.style.left = document.querySelector('.py').offsetLeft + 'px';
+                    box.style.width = document.querySelector('.py').offsetWidth + 'px';
+                };
+
+                window.onresize = function() {
+                    box.style.top = document.querySelector('.py').offsetTop +  document.querySelector('.py').offsetHeight + 'px';
+                    box.style.left = document.querySelector('.py').offsetLeft + 'px';
+                    box.style.width = document.querySelector('.py').offsetWidth + 'px';
+                };
+
+            </script>
+
+            <canvas></canvas>
+        </div>
+        <script src="canvas.js" charset="utf-8"></script>
     </body>
 </html>

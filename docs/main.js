@@ -1,9 +1,7 @@
 var t;
-var retyping;
 
 window.onload = function() {
     t = document.querySelector('.textField');
-    retyping = false;
 };
 
 document.querySelector('.youtubeUrl').addEventListener('keypress', function(event) {
@@ -16,6 +14,8 @@ document.querySelector('.youtubeUrl').addEventListener('keypress', function(even
     }
 });
 
+/*----------------------------------------------------------------*/
+
 function checkText(e) {
     var text = t.value;
     if(e.keyCode == 13) {
@@ -26,7 +26,7 @@ function checkText(e) {
         var a = String.fromCharCode(e.which || e.keyCode);
         var validKey = /[1234aefnpsw]/;
         if(!validKey.test(a)) {
-            if(e.preventDefault()) e.preventDefault();
+            e.preventDefault();
             return false;
         }
     }
@@ -39,15 +39,14 @@ function checkText(e) {
 }
 
 function saveText(v) {
-    if(!retyping && v.length > 0) {
+    if(v.length > 0) {
         var ul = document.querySelector('.savedText');
         var new_li = document.createElement('li');
 
-        var new_type = document.createElement('i');
+        /*var new_type = document.createElement('i');
         new_type.classList.add('material-icons');
-        new_type.classList.add('type');
-        new_type.setAttribute('onclick', 'retype()');
-        new_type.innerHTML = '';
+        new_type.classList.add('timeStamp');
+        new_type.innerHTML = '';*/
 
         var new_text = document.createElement('b');
         new_text.classList.add('pBp');
@@ -59,7 +58,7 @@ function saveText(v) {
         new_clear.setAttribute('onclick', 'removeText(this.parentElement)');
         new_clear.innerHTML = '&#xE14C';
 
-        new_li.appendChild(new_type);
+        //new_li.appendChild(new_type);
         new_li.appendChild(new_text);
         new_li.appendChild(new_clear);
 
@@ -70,12 +69,12 @@ function saveText(v) {
             document.querySelector('.savedTextArea h2').remove();
             ul.appendChild(new_li);
         }
-    } else {
-
     }
 
     t.value = '';
 }
+
+/*----------------------------------------------------------------*/
 
 function removeText(el) {
     el.remove();
@@ -89,14 +88,9 @@ function removeText(el) {
         placeHolder.innerHTML = 'Play by Play';
         area.appendChild(placeHolder);
     }
-
 }
 
-function deleteText() {
-    document.querySelector('.invalid').value = '';
-    document.querySelector('.youtubeUrl').classList.remove('invalid');
-    document.querySelector('.xout').remove();
-}
+/*----------------------------------------------------------------*/
 
 function reset() {
     var ul = document.querySelector('.savedText');
@@ -112,6 +106,33 @@ function reset() {
     }
 
     t.value = '';
+}
+
+function download() {
+    var pBp = Array.prototype.slice.call(document.querySelectorAll('.pBp')).reverse();
+    for (var i = 0; i < pBp.length; i++) {pBp[i] = pBp[i].valueOf().textContent;}
+    if(t.value !== '') {
+        pBp.push(t.value);
+    }
+
+    if(pBp.length > 0) {
+        var link = document.createElement('a');
+        link.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(pBp.join('\n')));
+        link.setAttribute('download', 'datasheet.txt');
+
+        var e = document.createEvent('MouseEvents');
+        e.initEvent('click', true, false);
+
+        link.dispatchEvent(e);
+    }
+}
+
+/*----------------------------------------------------------------*/
+
+function deleteText() {
+    document.querySelector('.invalid').value = '';
+    document.querySelector('.youtubeUrl').classList.remove('invalid');
+    document.querySelector('.xout').remove();
 }
 
 function getVid(url) {
@@ -155,25 +176,4 @@ function getVid(url) {
     }
 }
 
-function download() {
-    var pBp = Array.prototype.slice.call(document.querySelectorAll('.pBp')).reverse();
-    for (var i = 0; i < pBp.length; i++) {pBp[i] = pBp[i].valueOf().textContent;}
-    if(t.value !== '') {
-        pBp.push(t.value);
-    }
-
-    if(pBp.length > 0) {
-        var link = document.createElement('a');
-        link.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(pBp.join('\n')));
-        link.setAttribute('download', 'datasheet.txt');
-
-        if (document.createEvent) {
-            var event = document.createEvent('MouseEvents');
-            event.initEvent('click', true, true);
-            link.dispatchEvent(event);
-        }
-        else {
-            link.click();
-        }
-    }
-}
+/*----------------------------------------------------------------*/

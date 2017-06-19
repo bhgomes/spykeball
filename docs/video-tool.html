@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Video Tool · Spykeball</title>
+        <link href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link rel="stylesheet" href="css/main.css">
+    </head>
+    <body>
+        <nav>
+            <a href="index.html">spykeball</a>
+            <i class="material-icons">&#xE865</i>
+        </nav>
+        <section class="left">
+            <div class="youtubeBox">
+                <div class="youtubeInput">
+                    <i class="material-icons youlogo">&#xE064</i>
+                    <label for="url">YouTube Video</label>
+                    <input class="youtubeUrl" type="text" name="url" placeholder="https://www.youtube.com/embed/"  value="" autocomplete="off">
+                    <!--https://www.youtube.com/embed/R-0hRAtdOP4-->
+                 </div>
+            </div>
+            <div class="text">
+                <input class="textField" type="text" value="" placeholder="type here"  onkeypress="checkText(event)" autocomplete="off" autofocus>
+                <button class="enter" type="button" onclick="saveText(t.value)"><i class="material-icons">&#xE315</i></button>
+            </div>
+        </section>
+        <section class="right">
+            <div class="savedTextArea">
+                <h2>Play by Play</h2>
+                <ul class="savedText"></ul>
+            </div>
+            <div class="bottom_BTNS">
+                <button class="reset" type="button" onclick="reset()"><i class="material-icons">&#xE042</i></button>
+                <button class="download" onclick="download()"><i class="material-icons">&#xE2C4</i></button>
+            </div>
+        </section>
+        <script src="main.js" charset="utf-8"></script>
+    </body>
+</html>

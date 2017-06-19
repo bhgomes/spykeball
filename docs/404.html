@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>404 · Spykeball</title>
+        <link href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link rel="stylesheet" href="css/main.css">
+    </head>
+    <body class="fourO">
+        <h1 class="four">4<a href="index.html" style="cursor: inherit"><img src="spikeball.png" alt="0"></a>4</h1>
+        <script type="text/javascript">
+            var x = setInterval(function() {
+                var cursorType = [
+                    'default', 'none', 'context-menu', 'help', 'pointer', 'progress',
+                    'cell', 'crosshair', 'text', 'vertical-text', 'alias', 'copy',
+                    'move', 'no-allowed', 'all-scroll', 'col-resize', 'row-resize', 'n-resize', 'e-resize', 's-resize', 'w-resize', 'ne-resize',
+                    'nw-resize', 'se-resize', 'sw-resize', 'nesw-resize', 'nwse-resize',
+                    'zoom-in', 'zoom-out', 'grab', 'grabbing'
+                ];
+                var rand = Math.floor(Math.random() * cursorType.length);
+                document.querySelector('.fourO').style.cursor = cursorType[rand];
+            }, 500);
+        </script>
+    </body>
+</html>
