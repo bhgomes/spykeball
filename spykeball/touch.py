@@ -1,11 +1,14 @@
 """Touch Classes."""
 
+from copy import deepcopy
 from collections import deque
 
 from spykeball.core import io
+from spykeball.core import util
 from spykeball.core.exception import (
-    InvalidPlayerException,
-    InvalidTouchMapException
+    PlayerException,
+    TouchMapException,
+    JSONKeyError,
 )
 from spykeball.player import Player
 
@@ -24,36 +27,35 @@ class _AbstractTouch(io.JSONSerializable):
 
     def __str__(self):
         """String representation of the Touch Object."""
-        actor = str(self._actor)
-
-        success = ""
-
+        success = "unsuccessful"
         if self._success:
             if self._strength == "s":
-                success = " strong"
+                success = "strong"
             elif self._strength == "w":
-                success = " weak"
-        else:
-            success = " unsuccessful"
+                success = "weak"
 
-        target = "" if self._target is None else " to " + str(self._target)
-        return self.__class__.__name__ + "(" + actor + success + target + ")"
+        return "{}({} {}{})".format(
+            self.__class__.__name__,
+            self._actor,
+            success,
+            ("" if self._target is None else " to " + str(self._target)))
 
     def to_json(self):
         """Encode the object into valid JSON."""
-        out = self.__dict__
+        out = deepcopy(self.__dict__)
         for k, v in list(out.items()):
             if k[0] == '_':
                 out[k[1:]] = out.pop(k)
 
-            if k == 'success' and v:
-                out.pop(k)
-            elif k in ('is_ace', 'strength') and not v:
-                out.pop(k)
+            if k[1:] == 'success' and v:
+                out.pop(k[1:])
+            elif k[1:] in ('is_ace', 'strength', 'target') and not v:
+                out.pop(k[1:])
         out['touch'] = self.__class__.__name__
         return out
 
-    def from_json(self, s):
+    @classmethod
+    def from_json(cls, data):
         """Decode the object from valid JSON."""
         return None
 
@@ -85,25 +87,22 @@ class Service(_AbstractTouch):
                  is_ace=False):
         """Initialize Service."""
         self._is_ace = is_ace if success else False
-        super().__init__(actor, success, target)
+        super().__init__(actor, success, target, strength)
 
     def __str__(self):
         """String representation of the Touch Object."""
-        actor = str(self._actor)
-
-        success = ""
-
+        success = "unsuccessful"
         if self._success:
             if self._strength == "s":
-                success = " strong"
+                success = "strong"
             elif self._strength == "w":
-                success = " weak"
-        else:
-            success = " unsuccessful"
+                success = "weak"
 
-        target = "" if self._target is None else " on " + str(self._target)
-        return ("Ace(" if self._is_ace else "Service(") + \
-            actor + success + target + ")"
+        return "{}({} {}{})".format(
+            "Ace" if self._is_ace else "Service",
+            self._actor,
+            success,
+            ("" if self._target is None else " to " + str(self._target)))
 
     @property
     def is_ace(self):
@@ -114,50 +113,28 @@ class Service(_AbstractTouch):
 class Defense(_AbstractTouch):
     """Defensive Return."""
 
-    def __init__(self, actor, success=True, target=None, strength=None):
-        """Initialize Defensive Return."""
-        super().__init__(actor, success, target, strength)
-
-    def __str__(self):
-        """String representation of the Defense Object."""
-        return super().__str__()
-
 
 class Set(_AbstractTouch):
     """Set."""
-
-    def __init__(self, actor, success=True, target=None, strength=None):
-        """Initialize Set."""
-        super().__init__(actor, success, target, strength)
-
-    def __str__(self):
-        """String representation of the Set Object."""
-        return super().__str__()
 
 
 class Spike(_AbstractTouch):
     """Spike."""
 
-    def __init__(self, actor, success=True, target=None, strength=None):
-        """Initialize Spike."""
-        super().__init__(actor, success, target, strength)
-
     def __str__(self):
         """String representation of the Spike Object."""
-        actor = str(self._actor)
-
-        success = ""
-
+        success = "unsuccessful"
         if self._success:
             if self._strength == "s":
-                success = " strong"
+                success = "strong"
             elif self._strength == "w":
-                success = " weak"
-        else:
-            success = " unsuccessful"
+                success = "weak"
 
-        target = "" if self._target is None else " on " + str(self._target)
-        return self.__class__.__name__ + "(" + actor + success + target + ")"
+        return "{}({} {}{})".format(
+            self.__class__.__name__,
+            self._actor,
+            success,
+            ("" if self._target is None else " on " + str(self._target)))
 
 
 Service._next = Defense
@@ -166,41 +143,37 @@ Set._next = Spike
 Spike._next = Defense
 
 
-class ActionList(io.JSONSerializable):
+class ActionList(util.PlayerInterface, io.JSONSerializable):
     """List of actions."""
 
     def __init__(self, p1, p2, p3, p4, *actions):
         """Instantiate an ActionList."""
-        self._p1 = p1
-        self._p2 = p2
-        self._p3 = p3
-        self._p4 = p4
-        self._actionlist_strings = list(actions)
-        self._actionlist = ActionList.parse(p1, p2, p3, p4, *actions)
+        super().__init__(p1, p2, p3, p4)
+        self._action_strings = list(actions)
+
+        if p1 and p2 and p3 and p4:
+            self._actionlist = ActionList.parse(p1, p2, p3, p4, *actions)
+            self._parsed = True
+        else:
+            self._actionlist = None
+            self._parsed = False
+
         self._outer_index = 0
         self._inner_index = 0
 
     def __str__(self):
         """Return string representation of the ActionList."""
         out = "ActionList({\n\n"
-        for i, a in enumerate(self._actionlist):
-            out += "  " + self._actionlist_strings[i] + ":\n"
-            for b in a:
-                out += "    " + str(b) + "\n"
-            out += "\n"
+        if self._parsed:
+            for i, a in enumerate(self._actionlist):
+                out += "  " + self._action_strings[i] + ":\n"
+                for b in a:
+                    out += "    " + str(b) + "\n"
+                out += "\n"
+        else:
+            for e in self._action_strings:
+                out += "  " + e + "\n"
         return out + "})"
-
-    def to_json(self):
-        """Encode the object into valid JSON."""
-        return {
-            "class": "ActionList",
-            "strings": self._actionlist_strings,
-            "actions": self._actionlist
-            }
-
-    def from_json(self, s):
-        """Decode the object from valid JSON."""
-        return None
 
     def __getitem__(self, index):
         """Get item from ActionList."""
@@ -211,8 +184,63 @@ class ActionList(io.JSONSerializable):
         else:
             return None
 
+    def __setitem__(self, key, item):
+        """Set item from ActionList."""
+        if isinstance(item, str):
+            self._action_strings[key] = item
+            if self._parsed:
+                self._actionlist[key] = ActionList.parse(
+                    self._p1, self._p2, self._p3, self._p4, *(item))[0]
+        else:
+            raise TypeError("Not a valid key.", key, type(key))
+
+    def __iter__(self):
+        """Return iterator object for ActionList."""
+        return self
+
+    def __next__(self):
+        """Return next action in the ActionList."""
+        if self._parsed:
+            if self._outer_index >= len(self._actionlist):
+                raise StopIteration
+            else:
+                out = self._actionlist[self._outer_index][self._inner_index]
+                self._inner_index += 1
+                if (self._inner_index >=
+                        len(self._actionlist[self._outer_index])):
+                    self._inner_index = 0
+                    self._outer_index += 1
+                return out
+        else:
+            if self._outer_index >= len(self._action_strings):
+                raise StopIteration
+            else:
+                out = self._action_strings[self._outer_index]
+                self._outer_index += 1
+                return out
+
+    def __contains__(self, item):
+        """Return True if item is contained in ActionList."""
+        if self._parsed:
+            return (
+                item in self._action_strings or
+                item in self._actionlist or
+                any(item in m for m in self._actionlist))
+        else:
+            return item in self._action_strings
+
+    def __len__(self):
+        """Return length of ActionList."""
+        if self._parsed:
+            return len(self._actionlist)
+        else:
+            return len(self._action_strings)
+
     def _get_actions_from(self, player):
         """Find all actions related to the player and return."""
+        if not self._parsed:
+            raise PlayerException("No players registered.", None)
+
         output = {"actor": [], "target": []}
 
         for play in self._actionlist:
@@ -225,38 +253,43 @@ class ActionList(io.JSONSerializable):
 
         return output
 
-    def __setitem__(self, key, item):
-        """Set item from ActionList."""
-        if isinstance(item, str):
-            self._actionlist_strings[key] = item
-            self._actionlist[key] = ActionList.parse(
-                self._p1, self._p2, self._p3, self._p4, item)[0]
-        else:
-            raise TypeError("Not a valid key.", key, type(key))
+    def subaction_groups(self):
+        """Return subactions that represent each point of the ActionList."""
+        if not self._parsed:
+            raise PlayerException("No players registered.", None)
 
-    def __iter__(self):
-        """Return iterator object for ActionList."""
-        return self
+        group = 0
+        while group < len(self._actionlist):
+            yield self._actionlist[group]
+            group += 1
 
-    def __next__(self):
-        """Return next action in the ActionList."""
-        if self._outer_index >= len(self._actionlist):
-            raise StopIteration
-        else:
-            out = self._actionlist[self._outer_index][self._inner_index]
-            self._inner_index += 1
-            if self._inner_index >= len(self._actionlist[self._outer_index]):
-                self._inner_index = 0
-                self._outer_index += 1
-            return out
+    @classmethod
+    def from_strings(cls, *actions):
+        """Create a list based only on string based inputs."""
+        return cls(None, None, None, None, *actions)
 
-    def __contains__(self, item):
-        """Return True if item is contained in ActionList."""
-        return item in self._actionlist or item in self._actionlist_strings
+    @property
+    def actions(self):
+        """Return actions as AbstractTouches."""
+        return self._actionlist if self._parsed else self._action_strings
 
-    def __len__(self):
-        """Return length of ActionList."""
-        return len(self._actionlist)
+    @actions.setter
+    def actions(self, *acts):
+        """Set the actions."""
+        self._action_strings = acts
+        if self._parsed:
+            self._actionlist = ActionList.parse(
+                self._p1, self._p2, self._p3, self._p4, *acts)
+
+    @property
+    def as_strings(self):
+        """Return the ActionList as a list of strings."""
+        return self._action_strings
+
+    @property
+    def parsed(self):
+        """Return true if ActionList has been parsed."""
+        return self._parsed
 
     @staticmethod
     def parse(p1, p2, p3, p4, *actions):
@@ -266,8 +299,8 @@ class ActionList(io.JSONSerializable):
         def pmap(player):
             out = {"1": p1, "2": p2, "3": p3, "4": p4}.get(player)
             if out is None:
-                raise InvalidPlayerException(
-                    "Player is not part of this player list",
+                raise PlayerException(
+                    "Player is not part of this player list.",
                     player, (p1, p2, p3, p4))
             else:
                 return out
@@ -288,12 +321,11 @@ class ActionList(io.JSONSerializable):
             def verify_action_deque_empty(error_on=False):
                 if error_on:
                     if len(action_deque) == 0:
-                        raise InvalidTouchMapException(
-                            "No ending character.", point)
+                        raise TouchMapException("No ending character.", point)
                 else:
                     if len(action_deque) != 0:
-                        raise InvalidTouchMapException(
-                            "Characters past end of play.", point)
+                        raise TouchMapException(
+                            "Touch past end of play.", point)
 
             def set_focus(player):
                 nonlocal focus
@@ -306,11 +338,11 @@ class ActionList(io.JSONSerializable):
                     if focus in other_team:
                         same_team, other_team = other_team, same_team
                     else:
-                        raise InvalidTouchMapException("Team collision.",
-                                                       point,
-                                                       focus,
-                                                       same_team,
-                                                       other_team)
+                        raise TouchMapException("Team collision.",
+                                                point,
+                                                focus,
+                                                same_team,
+                                                other_team)
 
             while len(action_deque) != 0:
                 if touch is Service:
@@ -327,7 +359,7 @@ class ActionList(io.JSONSerializable):
                                                    target=pmap(target),
                                                    is_ace=True))
                         else:
-                            raise InvalidTouchMapException(
+                            raise TouchMapException(
                                 "Player cannot ace a teammate", point)
                         verify_action_deque_empty(error_on=False)
                     elif modifier in other_team:
@@ -336,8 +368,7 @@ class ActionList(io.JSONSerializable):
                         set_focus(modifier)
                         touch = Defense
                     else:
-                        raise InvalidTouchMapException(
-                            "Invalid character.", point)
+                        raise TouchMapException("Invalid character.", point)
 
                 else:
                     modifier = next_touch()
@@ -365,7 +396,7 @@ class ActionList(io.JSONSerializable):
 
                         if target in same_team or target in other_team:
                             if target in same_team and touch is Spike:
-                                raise InvalidTouchMapException(
+                                raise TouchMapException(
                                     "Player cannot spike on a teammate", point)
 
                             if target in other_team:
@@ -378,73 +409,65 @@ class ActionList(io.JSONSerializable):
                             touch = touch._next
 
                         else:
-                            raise InvalidTouchMapException(
+                            raise TouchMapException(
                                 "Invalid character.", point)
 
             output.append(touches)
 
         return output
 
-    @property
-    def actions(self):
-        """Return actions as AbstractTouches."""
-        return self._actionlist
+    def to_json(self, with_touches=True):
+        """Encode the object into valid JSON."""
+        actionlist = {
+            "class": "ActionList",
+            "strings": self._action_strings
+        }
 
-    @actions.setter
-    def actions(self, *acts):
-        """Set the actions."""
-        self._actionlist_strings = acts
-        self._actionlist = ActionList.parse(
-            self._p1, self._p2, self._p3, self._p4, *acts)
+        if with_touches and self._parsed:
+            actionlist['players'] = {
+                'p1': self._p1,
+                'p2': self._p2,
+                'p3': self._p3,
+                'p4': self._p4
+            }
 
-    def subaction_groups(self):
-        """Return Subaction that represent each point of the Game."""
-        group = 0
-        while group < len(self._actionlist):
-            yield self._actionlist[group]
-            group += 1
+            actionlist['touches'] = self._actionlist
 
-    @property
-    def as_strings(self):
-        """Return the ActionList as a list of strings."""
-        return self._actionlist_strings
+        return actionlist
 
-    @property
-    def p1(self):
-        """Return Player 1."""
-        return self._p1
+    @classmethod
+    def from_json(cls, data, with_touches=True):
+        """Decode the object from valid JSON."""
+        actionlist = None
+        if util.has_keys(data, 'class', 'strings'):
+            if with_touches:
+                if (util.has_keys(data, 'players', 'touches') and
+                        util.has_keys(data['players'],
+                                      'p1', 'p2', 'p3', 'p4')):
+                    p1 = Player.from_json(data['players']['p1'])
+                    p2 = Player.from_json(data['players']['p2'])
+                    p3 = Player.from_json(data['players']['p3'])
+                    p4 = Player.from_json(data['players']['p4'])
+                    actionlist = cls(p1, p2, p3, p4, data['strings'])
+                else:
+                    raise JSONKeyError(data, ('players', 'touches'))
+            else:
+                actionlist = cls.from_strings(data['strings'])
+        else:
+            raise JSONKeyError(data, 'class', 'strings')
 
-    @p1.setter
-    def p1(self, new_p1):
-        """Set Player 1."""
-        self._p1 = new_p1
+        return actionlist
 
-    @property
-    def p2(self):
-        """Return Player 2."""
-        return self._p2
+    def save(self, fp, with_touches=True):
+        """Save ActionList contents to a JSON file."""
+        super().save(fp, with_touches and self._parsed)
 
-    @p2.setter
-    def p2(self, new_p2):
-        """Set Player 2."""
-        self._p2 = new_p2
-
-    @property
-    def p3(self):
-        """Return Player 3."""
-        return self._p3
-
-    @p3.setter
-    def p3(self, new_p3):
-        """Set Player 3."""
-        self._p3 = new_p3
-
-    @property
-    def p4(self):
-        """Return Player 4."""
-        return self._p4
-
-    @p4.setter
-    def p4(self, new_p4):
-        """Set Player 4."""
-        self._p4 = new_p4
+    @classmethod
+    def load(cls, fp, with_touches=True):
+        """Load ActionList contents from a JSON file."""
+        if io.ext_matches(fp, '.txt'):
+            with open(fp, 'r+') as file:
+                return cls.from_strings(*filter(lambda x: x != '',
+                                                io.readsplit(file, ',', '\n')))
+        else:
+            return super().load(fp, with_touches)

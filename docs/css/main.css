@@ -143,6 +143,8 @@ canvas {
     border: 2px solid #ffd704;
     color: #ffd704;
     background: none;
+    text-decoration: none;
+    line-height: 40px;
 }
 
 .submit:hover {

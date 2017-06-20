@@ -1,34 +1,24 @@
 """Player Library."""
 
-import json
-
 from spykeball.core import io
 from spykeball.core import util
-from spykeball.core.exception import InvalidGameException
+from spykeball.core.exception import (
+    GameException,
+    JSONKeyError,
+)
 
 
 class Player(util.UIDObject, io.JSONSerializable):
     """An object representing a Spikeball Player."""
 
-    def __init__(self, data, object_uid=None):
+    def __init__(self, name, object_uid=None):
         """Initialize Player."""
-        if isinstance(data, dict):
-            self._name = data.get('name')
-            self._stats = data.get('stats')
-            object_uid = data.get('UID')
-        elif isinstance(data, str):
-            self._name = data
-            self._stats = {}
-        elif isinstance(data, int):
-            self._name = ''
-            object_uid = data
-        else:
-            raise TypeError("Data argument Invalid: "
-                            "it is neither a string nor a dictionary.", data)
         super().__init__(object_uid)
+        self._name = name
+        self._stats = {}
 
     def __str__(self):
-        """Return name of the player."""
+        """Return name of the player or UID if name is empty."""
         return self._name if self._name else self.UID
 
     @property
@@ -55,36 +45,35 @@ class Player(util.UIDObject, io.JSONSerializable):
             }
         else:
             # consider ignoring this exception
-            raise InvalidGameException("Game already Registered.", game)
+            raise GameException("Game already Registered.", game)
 
     def to_json(self, with_stats=False):
         """Encode the object into valid JSON."""
-        out = {'UID': self.UID, 'name': self._name}
+        player = {'UID': self.UID, 'name': self._name}
         if with_stats and self._stats:
-            out['stats'] = self._stats
-        return out
+            player['stats'] = self._stats
+        return player
 
-    def from_json(self, s):
+    @classmethod
+    def from_json(cls, data, with_stats=False):
         """Decode the object from valid JSON."""
-        return None
+        player = None
+        if util.has_keys(data, 'name', 'UID'):
+            player = cls(data['name'], object_uid=data['UID'])
+        else:
+            raise JSONKeyError(data, ('name', 'UID'))
+
+        if with_stats and 'stats' in data:
+            for game_id, stat in data['stats'].items():
+                player._stats[game_id] = stat
+
+        return player
 
     def save(self, fp, with_stats=True):
         """Save a player's progress in a file."""
         super().save(fp, with_stats)
 
-    def load(self, fp, with_stats=True):
+    @classmethod
+    def load(cls, fp, with_stats=True):
         """Load a player's progress from a file."""
-        saved = {}
-        with open(fp, "r+") as file:
-            saved = json.load(file)
-            self._name = saved['name']
-
-            if saved['UID'] != self.UID:
-                raise Exception()
-
-            if with_stats:
-                stats = saved.get('stats')
-                if not stats or not isinstance(stats, dict):
-                    raise Exception()
-                else:
-                    self._stats = stats
+        super().load(fp, with_stats)
