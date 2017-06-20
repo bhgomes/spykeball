@@ -6,9 +6,9 @@ class PlayerException(Exception):
 
     def __init__(self, message, player, *args):
         """Initialize with the player."""
-        self.message = message
         self.player = player
-        super().__init__(message, player, *args)
+        self.message = message + "Player: {}".format(player)
+        super().__init__(self.message, player, *args)
 
 
 class GameException(Exception):
@@ -16,19 +16,19 @@ class GameException(Exception):
 
     def __init__(self, message, game, *args):
         """Initialize with the game."""
-        self.message = message
         self.game = game
-        super().__init__(message, game, *args)
+        self.message = message + "Game: {}".format(game)
+        super().__init__(self.message, game, *args)
 
 
 class TouchMapException(Exception):
     """Raise an exception about a touch map."""
 
-    def __init__(self, message, touch_string, *args):
+    def __init__(self, message, touch_map, *args):
         """Initialize with the touch map."""
-        self.message = message
-        self.touch_string = touch_string
-        super().__init__(message, touch_string, *args)
+        self.touch_map = touch_map
+        self.message = message + "TouchMap: {}".format(touch_map)
+        super().__init__(self.message, touch_map, *args)
 
 
 class JSONKeyError(Exception):

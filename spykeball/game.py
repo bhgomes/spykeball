@@ -8,7 +8,7 @@ from spykeball.core.exception import (
     JSONKeyError
 )
 from spykeball.player import Player
-from spykeball.stat import StatModel, DefaultStatModel
+from spykeball.stat.model import StatModel, DefaultStatModel
 from spykeball.touch import ActionList
 
 
