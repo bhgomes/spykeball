@@ -1,1 +1,22 @@
-
+build: off
+branches:
+    only:
+        - master
+environment:
+    global:
+        MINICONDA_VERSION: "3.5.5"
+        PYTHON: "C:\\conda"
+        CONDA_DEPENDENCIES: "pyqt=5"
+    matrix:
+        - PYTHON: "C:\\Python36"
+init:
+    - "ECHO %PYTHON%"
+    - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
+install:
+    - "pip install --disable-pip-version-check --user --upgrade pip"
+    - "%CMD_IN_ENV% pip install -r requirements.txt"
+    - "%PYTHON%\\python.exe -m pip install wheel"
+test_script:
+    - "%PYTHON%\\python.exe setup.py test"
+after_test:
+    - "%PYTHON%\\python.exe setup.py bdist_wheel"

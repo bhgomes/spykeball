@@ -4,34 +4,12 @@ from collections import Sequence
 from random import randrange
 
 
-# not working
-
-
-class staticproperty(property):
-    """Static Method and Property."""
-
-    def __get__(self, cls, owner):
-        """Getter for property."""
-        return staticmethod(self.fget).__get__(None, owner)()
-
-
-# not working
-
-
-class classproperty(property):
-    """Class Method and Property."""
-
-    def __get__(self, cls, owner):
-        """Getter for property."""
-        return classmethod(self.fget).__get__(cls, owner)()
-
-
 class UIDObject(object):
     """A Unique Identifier for Each Subclass."""
 
     __obj_uid_list = []
 
-    def __init__(self, object_uid=None):
+    def __init__(self, object_uid=None, **kwargs):
         """Create the object_uid."""
         self.__object_uid = object_uid
 
@@ -41,11 +19,17 @@ class UIDObject(object):
         else:
             self.__object_uid = self.generate_uid(seed=object_uid)
         self.__obj_uid_list.append(self.__object_uid)
+        super().__init__(**kwargs)
 
     @property
     def UID(self):
         """Return the object_uid for this Object."""
         return self.__object_uid
+
+    @property
+    def UID_num(self):
+        """Return the numeric component of the object_uid for this Object."""
+        return int(''.join(self.__object_uid.split('-')[1:]))
 
     @classmethod
     def generate_uid(cls, seed=None):
@@ -105,6 +89,95 @@ class UIDObject(object):
                     "UID must begin with the same letter as the class.")
         else:
             raise TypeError("UID is not a string.")
+
+
+class PlayerInterface(object):
+    """Implements gets and sets for each player."""
+
+    def __init__(self, p1, p2, p3, p4, **kwargs):
+        """Add each player to the Interface."""
+        self.players = p1, p2, p3, p4
+        self._players_set = p1 and p2 and p3 and p4
+        # use ^ to auto update
+        super().__init__(**kwargs)
+
+    @property
+    def p1(self):
+        """Return Player 1."""
+        return self._p1
+
+    @p1.setter
+    def p1(self, new_p1):
+        """Set Player 1."""
+        self._p1 = new_p1
+        self._players['p1'] = new_p1
+        self._teams['home'] = (new_p1, self._p2)
+
+    @property
+    def p2(self):
+        """Return Player 2."""
+        return self._p2
+
+    @p2.setter
+    def p2(self, new_p2):
+        """Set Player 2."""
+        self._p2 = new_p2
+        self._players['p2'] = new_p2
+        self._teams['home'] = (self._p1, new_p2)
+
+    @property
+    def p3(self):
+        """Return Player 3."""
+        return self._p3
+
+    @p3.setter
+    def p3(self, new_p3):
+        """Set Player 3."""
+        self._p3 = new_p3
+        self._players['p3'] = new_p3
+        self._teams['away'] = (new_p3, self._p4)
+
+    @property
+    def p4(self):
+        """Return Player 4."""
+        return self._p4
+
+    @p4.setter
+    def p4(self, new_p4):
+        """Set Player 4."""
+        self._p4 = new_p4
+        self._players['p4'] = new_p4
+        self._teams['away'] = (self._p3, new_p4)
+
+    @property
+    def players(self):
+        """Return players of the game."""
+        return self._players
+
+    @players.setter
+    def players(self, ps):
+        """Set the players."""
+        self._p1 = ps[0]
+        self._p2 = ps[1]
+        self._p3 = ps[2]
+        self._p4 = ps[3]
+        self._players = {"p1": ps[0], "p2": ps[1], "p3": ps[2], "p4": ps[3]}
+        self._teams = {"home": (ps[0], ps[1]), "away": (ps[2], ps[3])}
+
+    @property
+    def home_team(self):
+        """Return home team of the game."""
+        return self._teams['home']
+
+    @property
+    def away_team(self):
+        """Return away team of the game."""
+        return self._teams['away']
+
+
+def has_keys(d, *keys):
+    """Return true if the dictionary has these keys."""
+    return all(k in d for k in keys)
 
 
 def flatten(l):
