@@ -3,35 +3,49 @@
     <head>
         <meta charset="utf-8">
         <title>Spykeball</title>
-        <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,700" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,700,900" rel="stylesheet">
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
         <link rel="stylesheet" href="css/main.css">
     </head>
     <body>
         <div class="landing">
-            <h1 class="landingTitle">s<b class="py">py</b>keball</h1>
+            <h1 class="landingTitle"><span id="s">s</span><b class="py">py</b><span id="morf">keball</span></h1>
             <div class="login">
                 <div class="loginBox">
                     <button class="loginBTN" type="button" onclick="openLogin()">Login</button>
+                    <form class="" action="video-tool.html" method="post">
+                        <legend>welcome to<span>Spykeball</span></legend>
+                        <input class="username loginText" type="text" value="" placeholder="Username" autocomplete="none">
+                        <input class="password loginText" type="password" value="" placeholder="Password">
+                        <input class="submit" type="submit" value="Login">
+                    </form>
                 </div>
-                <div class="loginArea"></div>
                 <script type="text/javascript">
+
                     function openLogin() {
                         var btn = document.querySelector('.loginBTN');
                         btn.style.opacity = '0';
 
-                        var title = document.querySelector('.landingTitle');
-                        title.style.marginTop = '-100vh';
+                        var title = document.querySelector('.py');
+                        title.style.top = '-100vh';
+
+                        var s = document.querySelector('#s');
+                        s.style.opacity = '0';
+
+                        var morf = document.querySelector('#morf');
+                        morf.innerHTML = 'Login';
+                        morf.style.fontWeight = '900';
 
                         var box = document.querySelector('.loginBox');
-                        box.style.height = '80vh';
-                        box.style.top = 'calc(50% - 40vh)';
+                        box.style.height = '480px';
+                        box.style.top = 'calc(50% - 240px)';
 
-                        var loginArea = document.querySelector('.loginArea');
-                        loginArea.style.width = '60vw';
-                        loginArea.style.left = '15vw';
+                        var form = document.querySelector('.loginBox form');
+                        form.style.opacity = '1';
 
-
+                        setTimeout(function () {
+                            btn.remove();
+                        }, 0);
                     }
                 </script>
             </div>
@@ -42,13 +56,14 @@
                     box.style.top = document.querySelector('.py').offsetTop +  document.querySelector('.py').offsetHeight + 'px';
                     box.style.left = document.querySelector('.py').offsetLeft + 'px';
                     box.style.width = document.querySelector('.py').offsetWidth + 'px';
+                    //openLogin();
                 };
 
-                window.onresize = function() {
+                /*window.onresize = function() {
                     box.style.top = document.querySelector('.py').offsetTop +  document.querySelector('.py').offsetHeight + 'px';
                     box.style.left = document.querySelector('.py').offsetLeft + 'px';
                     box.style.width = document.querySelector('.py').offsetWidth + 'px';
-                };
+                };*/
 
             </script>
 

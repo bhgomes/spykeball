@@ -44,12 +44,15 @@ body {
     color: #1C1C1D;
     background: none;
     text-shadow: 0.5vw 0.5vw #eee;
-    transition: margin-top 3000ms ease;
 }
 
 .landingTitle .py {
+    position: relative;
+    top: 0;
     color: #000;
     padding-bottom: 12px;
+    transition: top 600ms cubic-bezier(0.68, 1, 0.265, 1.55);
+    -webkit-transition: top 600ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
 canvas {
@@ -64,32 +67,87 @@ canvas {
     height: 100vh;
     text-align: center;
     background: #000;
-    transition: top 3000ms ease;
+    transition: top 600ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    -webkit-transition: top 600ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
     z-index: 2;
+    color: #fff;
 }
 
-.login .loginBTN {
+.loginBTN {
     font-size: 1.3vw;
     margin-top: 4vh;
     text-align: center;
     color: #000;
     padding: 1.2vh 5vw;
-    border-radius: 2px;
-    font-weight: 700;
-    background: #ffd704;
+    font-weight: 400;
+    border: 2px solid #ffd704;
+    color: #ffd704;
+    background: #000;
     cursor: pointer;
     transition: opacity 300ms ease;
 }
 
-.login .loginArea {
-    position: fixed;
-    top: calc(50% - 37.5vh);
-    left: 20vw;
-    height: 75vh;
-    width: 0;
-    background: #ffd742;
-    box-shadow: 0.5vw 0.5vw #eee;
-    transition: all 3000ms 3000ms ease;
+.loginBTN:hover {
+    color: #000;
+    background: #ffd704;
+}
+
+#s {
+    transition: opacity 300ms ease;
+}
+
+#morf {
+    transition: font-weight 600ms;
+}
+
+.loginBox form {
+    padding: 120px;
+    opacity: 0;
+    transition: opacity 600ms ease;
+}
+
+.loginBox form legend {
+    font-size: 20px;
+    font-weight: 300;
+    margin-bottom: 20px;
+}
+
+.loginBox form legend span {
+    display: block;
+    font-size: 35px;
+    font-weight: 900;
+    color: #ffd704;
+}
+
+.loginText {
+    position: relative;
+    left: calc(50% - 160px);
+    display: block;
+    width: 300px;
+    height: 40px;
+    font-size: 15px;
+    border-radius: 4px;
+    margin-top: 10px;
+    padding: 0 10px;
+}
+
+.submit {
+    display: block;
+    position: relative;
+    left: calc(50% - 40px);
+    width: 80px;
+    height: 40px;
+    font-size: 15px;
+    margin-top: 20px;
+    cursor: pointer;
+    border: 2px solid #ffd704;
+    color: #ffd704;
+    background: none;
+}
+
+.submit:hover {
+    color: #000;
+    background: #ffd704;
 }
 
 /*----------------------------------------------------------------*/
