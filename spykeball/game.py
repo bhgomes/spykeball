@@ -4,19 +4,20 @@ from spykeball.core import io
 from spykeball.core import util
 from spykeball.core.exception import (
     GameException,
+    JSONKeyError,
     PlayerException,
-    JSONKeyError
+    TouchMapException,
 )
 from spykeball.player import Player
 from spykeball.stat.model import StatModel, DefaultStatModel
-from spykeball.touch import ActionList
+from spykeball.action.actionlist import ActionList
 
 
 class Game(util.UIDObject, util.PlayerInterface, io.JSONSerializable):
     """Game Object."""
 
-    def __init__(self, p1, p2, p3, p4,
-                 stat_model=DefaultStatModel, *actions, object_uid=None):
+    def __init__(self, p1, p2, p3, p4, *actions, stat_model=DefaultStatModel,
+                 object_uid=None):
         """Initialize Game Object."""
         super().__init__(p1=p1, p2=p2, p3=p3, p4=p4, object_uid=object_uid)
 
@@ -30,9 +31,8 @@ class Game(util.UIDObject, util.PlayerInterface, io.JSONSerializable):
 
     def __str__(self):
         """String Representation of the Game."""
-        title = "Game({\n\n(%s and %s) vs (%s and %s)" % \
-            (self._p1, self._p2, self._p3, self._p4)
-        return title + "\n\n})"
+        return "Game({\n\n({} and {}) vs ({} and {})\n\n})".format(
+            self._p1, self._p2, self._p3, self._p4)
 
     def __len__(self):
         """Return length of the game."""
@@ -41,17 +41,20 @@ class Game(util.UIDObject, util.PlayerInterface, io.JSONSerializable):
     def _set_actionlist(self, touches):
         """Set the ActionList object stored in the Game."""
         if len(touches) == 1 and isinstance(touches[0], ActionList):
+            if not touches[0].parsed:
+                touches[0].register_players(self._players)
             self._actionlist = touches[0]
-            self.resetGameFlagsTo(False)
         elif isinstance(touches, ActionList):
             if not touches.parsed:
-                pass
+                touches.register_players(self._players)
             self._actionlist = touches
-            self.resetGameFlagsTo(False)
         elif len(touches) != 0:
             self._actionlist = ActionList(
                 self._p1, self._p2, self._p3, self._p4, *touches)
-            self.resetGameFlagsTo(False)
+        else:
+            raise TypeError("Touches does not have the correct input type.",
+                            touches, type(touches))
+        self.reset_game_flags()
 
     def _verify_played_status(self, error_on=False):
         """Verify that the game is played or not."""
@@ -61,6 +64,12 @@ class Game(util.UIDObject, util.PlayerInterface, io.JSONSerializable):
         else:
             if not self._game_played:
                 raise GameException("Game has not been played yet.", self)
+
+    def reset_game_flags(self):
+        """Reset the game flags."""
+        self._game_played = False
+        self._stats_calculated = False
+        self._stats_saved = False
 
     @property
     def stat_model(self):
@@ -89,6 +98,11 @@ class Game(util.UIDObject, util.PlayerInterface, io.JSONSerializable):
         return self._game_played
 
     @property
+    def stats_calculated(self):
+        """Return true if the stats have been calculated."""
+        return self._stats_calculated
+
+    @property
     def stats_saved(self):
         """Return true if the stats have been saved."""
         return self._stats_saved
@@ -110,11 +124,16 @@ class Game(util.UIDObject, util.PlayerInterface, io.JSONSerializable):
 
     def play(self, *touches, save_stats=True):
         """Perform all touches from the game."""
+        # what if they want to play again but with different touches
+        # check if touches are different from other touches
+
         if self._game_played and self._stats_saved:
             raise GameException("Game has already been played.", self)
 
         if not self._game_played:
-            self._set_actionlist(touches)
+
+            if len(touches) > 0:
+                self._set_actionlist(touches)
 
             if self._actionlist is None:
                 raise GameException("No touches registered.", self)
@@ -127,11 +146,12 @@ class Game(util.UIDObject, util.PlayerInterface, io.JSONSerializable):
             service = self._teams['home']
             other = self._teams['away']
 
-            # check that the number of moves follows a certain requirement
+            # check that the number of moves follows a certain requirements
 
             for action in self._actionlist.subaction_groups():
                 if action[0].actor not in service:
-                    raise GameException("Wrong team serving", self)
+                    raise TouchMapException(
+                        "Wrong team serving.", action,  self._actionlist)
 
                 player = action[-1].actor
                 success = action[-1].success
@@ -214,39 +234,31 @@ class Game(util.UIDObject, util.PlayerInterface, io.JSONSerializable):
     def from_json(cls, data, game_played=True, with_stats=True):
         """Decode the object from valid JSON."""
         game = None
-        if util.has_keys(data, 'UID', 'teams', 'actions'):
-            if util.has_keys(data['teams'], 'home', 'away'):
-                p1 = Player.from_json(data['teams']['home'][0])
-                p2 = Player.from_json(data['teams']['home'][1])
-                p3 = Player.from_json(data['teams']['away'][0])
-                p4 = Player.from_json(data['teams']['away'][1])
+        if util.has_keys(data, 'UID', 'teams', 'actions', error=JSONKeyError):
+            teams = data['teams']
+            if util.has_keys(teams, 'home', 'away', error=JSONKeyError):
+                p1 = Player.from_json(teams['home'][0])
+                p2 = Player.from_json(teams['home'][1])
+                p3 = Player.from_json(teams['away'][0])
+                p4 = Player.from_json(teams['away'][1])
 
                 game = cls(p1, p2, p3, p4, DefaultStatModel, data['actions'],
                            object_uid=data['UID'])
 
-                if game_played and util.has_keys(data, 'winner', 'score'):
+                if game_played and util.has_keys(data, 'winner', 'score',
+                                                 error=JSONKeyError):
                     game._stats['winner'] = data['winner']
                     game._stats['score'] = data['score']
 
-                    if with_stats and 'stats' in data:
+                    if with_stats and util.has_keys(data, 'stats',
+                                                    error=JSONKeyError):
                         if util.has_keys(data['stats'], 'model',
-                                         'p1', 'p2', 'p3', 'p4'):
+                                         'p1', 'p2', 'p3', 'p4',
+                                         error=JSONKeyError):
                             # Stats are ignored because they are calculated
                             # using the given model when requested.
                             game.stat_model = \
                                 StatModel.from_json(data['stats']['model'])
-                        else:
-                            raise JSONKeyError(data['stats'], ('model',
-                                                               'p1', 'p2',
-                                                               'p3', 'p4'))
-                    else:
-                        raise JSONKeyError(data, ('stats'))
-                else:
-                    raise JSONKeyError(data, ('winner', 'score'))
-            else:
-                raise JSONKeyError(data['teams'], ('home', 'away'))
-        else:
-            raise JSONKeyError(data, ('UID', 'teams', 'actions'))
 
         return game
 
@@ -265,13 +277,11 @@ class Game(util.UIDObject, util.PlayerInterface, io.JSONSerializable):
                 self._actionlist = \
                     [s for s in io.readsplit(file, ",", "\n", *delimeters)
                      if s != '']
-                self.resetGameFlagsTo(False)
+                self.reset_game_flags()
         else:
             game = super().load(fp, game_played, with_stats)
         return game
 
-    def resetGameFlagsTo(self, value):
-        """Reset the game and recalls all scores from players."""
-        self._game_played = value
-        self._stats_calculated = value
-        self._stats_saved = value
+
+class GameRegistry(object):
+    """Class that holds game objects and records their history."""

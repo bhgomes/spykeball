@@ -1,7 +1,13 @@
 """Core for spykeball."""
 
+import string
+
 from collections import Sequence
-from random import randrange
+
+try:
+    import random.SystemRandom as random
+except Exception:
+    import random
 
 
 class UIDObject(object):
@@ -60,8 +66,8 @@ class UIDObject(object):
             while first_loop or test_uid in cls.__obj_uid_list:
                 first_loop = False
                 num_list = []
-                for _ in range(0, randrange(2, 5)):
-                    num = str(randrange(0, 999999))
+                for _ in range(0, random.randrange(1, random.randrange(4, 8))):
+                    num = str(random.randrange(0, 999999))
                     num_list.append('-' + num + '0' * (6-len(num)))
                 test_uid = out + ''.join(num_list)
             out = test_uid
@@ -157,12 +163,26 @@ class PlayerInterface(object):
     @players.setter
     def players(self, ps):
         """Set the players."""
-        self._p1 = ps[0]
-        self._p2 = ps[1]
-        self._p3 = ps[2]
-        self._p4 = ps[3]
-        self._players = {"p1": ps[0], "p2": ps[1], "p3": ps[2], "p4": ps[3]}
-        self._teams = {"home": (ps[0], ps[1]), "away": (ps[2], ps[3])}
+        if isinstance(ps, (tuple, list)):
+            self._p1 = ps[0]
+            self._p2 = ps[1]
+            self._p3 = ps[2]
+            self._p4 = ps[3]
+            self._players = {
+                "p1": ps[0], "p2": ps[1], "p3": ps[2], "p4": ps[3]
+                }
+            self._teams = {"home": (ps[0], ps[1]), "away": (ps[2], ps[3])}
+        elif isinstance(ps, dict) and has_keys(ps, 'p1', 'p2', 'p3', 'p4'):
+            self._players = ps
+            self._p1 = ps['p1']
+            self._p2 = ps['p2']
+            self._p3 = ps['p3']
+            self._p4 = ps['p4']
+            self._teams = {
+                "home": (ps['p1'], ps['p2']), "away": (ps['p3'], ps['p4'])
+                }
+        else:
+            raise TypeError("Input to players has wrong type.", ps, type(ps))
 
     @property
     def home_team(self):
@@ -175,9 +195,12 @@ class PlayerInterface(object):
         return self._teams['away']
 
 
-def has_keys(d, *keys):
+def has_keys(d, *keys, error=None):
     """Return true if the dictionary has these keys."""
-    return all(k in d for k in keys)
+    value = all(k in d for k in keys)
+    if not value and error is not None:
+        raise error(d, keys)
+    return value
 
 
 def flatten(l):
@@ -197,7 +220,7 @@ def join(seq):
     if not seq:
         return seq
 
-    if isinstance(seq[0], Sequence):
+    if isinstance(seq[0], Sequence) and not isinstance(seq[0], str):
         return list(flatten(seq))
     else:
         out = []
@@ -215,3 +238,12 @@ def join(seq):
             return type(seq[0])(''.join(out))
         except Exception:
             raise ValueError("Sequence cannot be joined.", seq)
+
+
+def randstring(n=0, source=None):
+    """Generate a random string of length 'n' from 'source'."""
+    if not source:
+        source = string.ascii_letters + string.digits
+    if n <= 0:
+        n = len(source)
+    return ''.join(random.choice(source, k=n))

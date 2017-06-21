@@ -7,7 +7,7 @@ class PlayerException(Exception):
     def __init__(self, message, player, *args):
         """Initialize with the player."""
         self.player = player
-        self.message = message + "Player: {}".format(player)
+        self.message = message + " Player: {}".format(player)
         super().__init__(self.message, player, *args)
 
 
@@ -17,8 +17,18 @@ class GameException(Exception):
     def __init__(self, message, game, *args):
         """Initialize with the game."""
         self.game = game
-        self.message = message + "Game: {}".format(game)
+        self.message = message + " Game: {}".format(game)
         super().__init__(self.message, game, *args)
+
+
+class TouchException(Exception):
+    """Raise an exception about a touch."""
+
+    def __init__(self, message, touch, *args):
+        """Initialize with the touch."""
+        self.touch = touch
+        self.message = message + " Touch: {}".format(touch)
+        super().__init__(self.message, touch, *args)
 
 
 class TouchMapException(Exception):
@@ -27,7 +37,7 @@ class TouchMapException(Exception):
     def __init__(self, message, touch_map, *args):
         """Initialize with the touch map."""
         self.touch_map = touch_map
-        self.message = message + "TouchMap: {}".format(touch_map)
+        self.message = message + " TouchMap: {}".format(touch_map)
         super().__init__(self.message, touch_map, *args)
 
 

@@ -36,8 +36,14 @@ class Player(util.UIDObject, io.JSONSerializable):
         """Return stats dictionary of the player."""
         return self._stats
 
+    @property
+    def games_played(self):
+        """Return the games that this person has participated in."""
+        return tuple(self._stats.keys())
+
     def add_game(self, game, stat_model=None):
         """Add a game to the player's statistics."""
+        # check this resolution
         if game.UID not in self.stats.keys() or not game.stats_saved:
             self._stats[game.UID] = {
                 "stat": game.player_stat(self, stat_model=stat_model),
@@ -58,12 +64,10 @@ class Player(util.UIDObject, io.JSONSerializable):
     def from_json(cls, data, with_stats=False):
         """Decode the object from valid JSON."""
         player = None
-        if util.has_keys(data, 'name', 'UID'):
+        if util.has_keys(data, 'name', 'UID', error=JSONKeyError):
             player = cls(data['name'], object_uid=data['UID'])
-        else:
-            raise JSONKeyError(data, ('name', 'UID'))
 
-        if with_stats and 'stats' in data:
+        if with_stats and util.has_keys(data, 'stats', error=JSONKeyError):
             for game_id, stat in data['stats'].items():
                 player._stats[game_id] = stat
 

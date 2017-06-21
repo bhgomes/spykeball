@@ -34,6 +34,16 @@ def ext_matches(fp, *ext):
     return fp.lower().endswith(ext)
 
 
+def findfile(fp, fail='', strip=False, encoding='utf-8'):
+    """Find file and returns contents."""
+    try:
+        with open(fp, encoding=encoding) as f:
+            out = f.read().splitlines() if isinstance(fail, list) else f.read()
+            return out.strip() if strip else out
+    except Exception:
+        return fail
+
+
 class JSONSerializable(metaclass=ABCMeta):
     """Creates a JSON Serializable Object."""
 

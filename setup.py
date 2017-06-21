@@ -1,36 +1,34 @@
 """Spykeball Setup."""
 
-import os
-
 from setuptools import setup, find_packages
 
-root = os.path.abspath(os.path.dirname(__file__))
-
-
-def find(fp, fail='', strip=False, encoding='utf-8'):
-    """Find file and returns contents."""
-    try:
-        with open(os.path.join(root, fp), encoding) as f:
-            out = f.read().splitlines() if isinstance(fail, list) else f.read()
-            return out.strip() if strip else out
-    except Exception:
-        return fail
-
+from spykeball.core.io import findfile
 
 setup(
     name='spykeball',
 
-    version=find('VERSION', fail='0.0.0', strip=True),
+    version=findfile('VERSION', fail='0.0.0', strip=True),
 
     description='Spikeball Statistics Engine',
-    long_description=find('README.rst'),
+    long_description=findfile('README.rst'),
 
     keywords='statistics sports',
 
     license='MIT',
 
     classifiers=[
-
+        'Development Status :: 2 - Pre-Alpha',
+        'Environment :: Console',
+        'Environment :: Web Environment',
+        'Intended Audience :: Developers',
+        'Intended Audience :: Information Technology',
+        'License :: OSI Approved :: MIT License',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python :: 3.6',
+        'Topic :: Games/Entertainment :: Simulation',
+        'Topic :: Scientific/Engineering :: Information Analysis',
+        'Topic :: Scientific/Engineering :: Mathematics',
+        'Topic :: Software Development :: Libraries :: Python Modules',
     ],
 
     author='Brandon Gomes',
@@ -41,12 +39,13 @@ setup(
 
     packages=find_packages(exclude=['docs', 'tests', 'tests.*']),
 
-    install_requires=find('requirements.txt', fail=[]),
+    install_requires=findfile('requirements.txt', fail=[]),
+    setup_requires=['pytest-runner'],
+    tests_require=['pytest'],
 
-    # change to gui later
     entry_points={
         'console_scripts': [
-            'spykeball=spykeball:main',
+            'spykeball=spykeball.cli:main',
         ],
     }
 )

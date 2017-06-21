@@ -3,11 +3,12 @@
 from abc import ABCMeta, abstractmethod
 
 from spykeball.core import io
+from spykeball.core import util
 from spykeball.core.exception import (
     PlayerException,
-    JSONKeyError,
+    TouchException,
 )
-from spykeball.touch import Defense, Set, Spike, Service
+from spykeball.action.touch import Defense, Set, Spike, Service
 
 
 class StatModel(io.JSONSerializable, metaclass=ABCMeta):
@@ -25,6 +26,78 @@ class StatModel(io.JSONSerializable, metaclass=ABCMeta):
         return super().__new__(name, bases, attr)
 
     @staticmethod
+    def touch_components(action_list, player):
+        """Return the relevant touch_components for each player."""
+        actions = action_list[player]
+
+        if actions is None:
+            raise PlayerException("Player is not part of the ActionList.",
+                                  player,
+                                  action_list)
+
+        performed = actions.get("actor")
+        recieved = actions.get("target")
+
+        components = ['aces', 'aced', 'serves_made', 'serve_total',
+                      'serve_ratio', 'spikes_returned', 'spike_total',
+                      'spike_ratio', 'd_touch_r', 'd_touch_nr', 'missed_sets',
+                      'missed_spikes', 'missed_total', 'tough_touch'
+                      ]
+
+        count = dict(zip(components, [0] * len(components)))
+
+        for act in performed:
+            if isinstance(act, Service):
+                if act.success:
+                    count['serves_made'] += 1
+                    if act.is_ace:
+                        count['aces'] += 1
+                count['serve_total'] += 1
+            elif isinstance(act, Defense):
+                if act.success:
+                    count['d_touch_r'] += 1
+                else:
+                    count['d_touch_nr'] += 1
+
+                if act.strength == 'w':
+                    count['tough_touch'] += 1
+            elif isinstance(act, Set):
+                if not act.success:
+                    count['missed_sets'] += 1
+
+                if act.strength == 'w':
+                    count['tough_touch'] += 1
+            elif isinstance(act, Spike):
+                if act.success:
+                    count['spikes_returned'] += 1
+                else:
+                    count['missed_spikes'] += 1
+                count['spike_total'] += 1
+            else:
+                raise TouchException(
+                    "Action must be of subtype _AbstractTouch", act)
+
+        for act in recieved:
+            if isinstance(act, Service):
+                if act.is_ace:
+                    count['aced'] += 1
+            elif isinstance(act, Defense):
+                pass
+            elif isinstance(act, Set):
+                pass
+            elif isinstance(act, Spike):
+                pass
+            else:
+                raise TouchException(
+                    "Action must be of subtype _AbstractTouch", act)
+
+        count['serve_ratio'] = count['serves_made'] / count['serve_total']
+        count['spike_ratio'] = count['spikes_returned'] / count['spike_total']
+        count['missed_total'] = count['missed_sets'] + count['missed_spikes']
+
+        return count
+
+    @staticmethod
     @abstractmethod
     def calculate(action_list, precision=4):
         """Perform the stat calculations and register player stat."""
@@ -39,21 +112,16 @@ class StatModel(io.JSONSerializable, metaclass=ABCMeta):
     def from_json(cls, data):
         """Decode the object from valid JSON."""
         model = None
-        if all(k in data for k in ('UID', 'name')):
+        if util.has_keys(data, 'UID', 'name'):
             model = StatModel.__stat_model_registry.get(data['name'])
             if model is None:
                 raise NameError("Model not found.", data['name'])
-        else:
-            raise JSONKeyError(
-                "JSON file does not have valid keys. "
-                "Should include 'name' and 'UID'.",
-                ('UID', 'name'), data.keys())
 
         return model
 
 
 class Model1(StatModel):
-    """Current Model as of 6/10/17."""
+    """Current Model as of 6/20/17."""
 
     def calculate(action_list, precision=4):
         """Perform the stat calculations and register player stat."""
@@ -69,103 +137,38 @@ class Model1(StatModel):
         game_length_weight = 1 if length <= 39 else 39.0 / length
 
         for player in stats.keys():
-            actions = action_list[player]
-
-            if actions is None:
-                raise PlayerException("Player is not part of the ActionList.",
-                                      player,
-                                      action_list)
-
-            performed = actions.get("actor")
-            recieved = actions.get("target")
-
-            aces = 0
-            aced = 0
-            serves_made = 0
-            total_serves = 0
-            spikes_returned = 0
-            total_spikes = 0
-            d_touch_r = 0
-            d_touch_nr = 0
-            missed_sets = 0
-            missed_spikes = 0
-            tough_touch = 0
-
-            for act in performed:
-                if isinstance(act, Service):
-                    if act.success:
-                        serves_made += 1
-                        if act.is_ace:
-                            aces += 1
-                    total_serves += 1
-                elif isinstance(act, Defense):
-                    if act.success:
-                        d_touch_r += 1
-                    else:
-                        d_touch_nr += 1
-
-                    if act.strength == "w":
-                        tough_touch += 1
-                elif isinstance(act, Set):
-                    if not act.success:
-                        missed_sets += 1
-
-                    if act.strength == "w":
-                        tough_touch += 1
-                elif isinstance(act, Spike):
-                    if act.success:
-                        spikes_returned += 1
-                    else:
-                        missed_spikes += 1
-                    total_spikes += 1
-                else:
-                    raise TypeError(
-                        "Action must be of subtype _AbstractTouch", act)
-
-            for act in recieved:
-                if isinstance(act, Service):
-                    if act.is_ace:
-                        aced += 1
-                elif isinstance(act, Defense):
-                    pass
-                elif isinstance(act, Set):
-                    pass
-                elif isinstance(act, Spike):
-                    pass
-                else:
-                    raise TypeError(
-                        "Action must be of subtype _AbstractTouch", act)
+            components = Model1.touch_components(action_list, player)
 
             try:
-                hitting = round(20 * (1 - spikes_returned / total_spikes),
-                                precision)
+                hitting = 20 * (1 - components['spike_ratio'])
             except ArithmeticError:
                 hitting = 0.0
 
             try:
-                defense = round((d_touch_nr + 0.4 * hitting * d_touch_r) *
-                                game_length_weight, precision)
+                defense = (components['d_touch_nr'] + 0.4 * hitting *
+                           components['d_touch_r']) * game_length_weight
             except ArithmeticError:
                 defense = 0.0
 
             try:
-                serving = round(5.5 * aces + 15 * (serves_made / total_serves),
-                                precision)
+                serving = (5.5 * components['aces'] + 15 *
+                           components['serve_ratio'])
             except ArithmeticError:
                 serving = 0.0
 
             try:
-                cleanliness = round(20 - 5 * (missed_sets + missed_spikes) - 2
-                                    * (tough_touch + aced), precision)
+                cleanliness = (20 - 5 * components['missed_total'] - 2 * (
+                    components['tough_touch'] + components['aced']))
             except ArithmeticError:
                 cleanliness = 0.0
 
             stats[player] = {
-                "total": hitting + defense + serving + cleanliness,
-                "hitting": hitting,
-                "defense": defense,
-                "serving": serving,
-                "cleanliness": cleanliness
+                "hitting": round(hitting, precision),
+                "defense": round(defense, precision),
+                "serving": round(serving, precision),
+                "cleanliness": round(cleanliness, precision),
+                "total": round(hitting + defense + serving + cleanliness,
+                               precision)
             }
 
         return stats

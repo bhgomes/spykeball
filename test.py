@@ -1,26 +1,19 @@
 """Current Testing Suite."""
 
 from spykeball import Game, Player, ActionList
-from spykeball.stat import DefaultStatModel
 
-p1 = Player("Billy", 83034839)
-p2 = Player("Bobby", 34924003)
-p3 = Player("Max", 24950013)
-p4 = Player("Cole", 34939114)
+p1 = Player("Billy")
+p2 = Player("Bobby")
+p3 = Player("Max")
+p4 = Player("Cole")
 
-al = ActionList.load('demo/sample/actions/action000.txt')
+players = p1, p2, p3, p4
 
-al.players = p1, p2, p3, p4
-# auto update parser
+g1 = Game(p1, p2, p3, p4, ActionList.load('demo/sample/actions/action001.txt'))
 
-al2 = ActionList(p1, p2, p3, p4, *al.as_strings)
+g1.play()
 
-# print(al2)
+print(g1.score)
 
-al2.save('demo/sample/actions/action000.json')
-
-g1 = Game(p1, p2, p3, p4, DefaultStatModel, al)
-
-print(g1.away_team)
-
-p3.save('demo/sample/players/max.json', with_stats=False)
+for p in players:
+    print("{} :: {}".format(p, p.stats))
