@@ -3,11 +3,20 @@
 from copy import deepcopy
 from enum import Enum
 
-from spykeball.core import io
-from spykeball.core import util
-from spykeball.core.exception import (
-    JSONKeyError,
-)
+from spykeball import io
+from spykeball import util
+
+from spykeball import JSONKeyError
+
+
+class TouchException(Exception):
+    """Raise an exception about a touch."""
+
+    def __init__(self, message, touch, *args):
+        """Initialize with the touch."""
+        self.touch = touch
+        self.message = message + " Touch: {}".format(touch)
+        super().__init__(self.message, touch, *args)
 
 
 class _AbstractTouch(io.JSONSerializable):
@@ -210,6 +219,7 @@ Set._next = Spike
 Spike._next = Defense
 
 
+# rename probabaly
 class TouchError(Enum):
     """Describes erroneous touch types."""
 

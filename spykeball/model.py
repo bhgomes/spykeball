@@ -2,13 +2,16 @@
 
 from abc import ABCMeta, abstractmethod
 
-from spykeball.core import io
-from spykeball.core import util
-from spykeball.core.exception import (
-    PlayerException,
-    TouchException,
-)
-from spykeball.action.touch import Defense, Set, Spike, Service
+from spykeball import io
+from spykeball import util
+
+from spykeball import PlayerException
+from spykeball import TouchException
+
+from spykeball import Defense
+from spykeball import Set
+from spykeball import Spike
+from spykeball import Service
 
 
 class StatModel(io.JSONSerializable, metaclass=ABCMeta):

@@ -45,7 +45,7 @@ setup(
 
     entry_points={
         'console_scripts': [
-            'spykeball=spykeball.cli:main',
+            'spykeball=spykeball:main',
         ],
     }
 )

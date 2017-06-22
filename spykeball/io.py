@@ -3,7 +3,8 @@
 import json
 
 from abc import ABCMeta, abstractmethod
-from spykeball.core import util
+
+from spykeball import util
 
 
 def readsplit(fp, *delimeters, buffer_size=4096):
@@ -42,6 +43,21 @@ def findfile(fp, fail='', strip=False, encoding='utf-8'):
             return out.strip() if strip else out
     except Exception:
         return fail
+
+
+class JSONKeyError(Exception):
+    """Raise if a KeyError occurs during JSON Processing."""
+
+    def __init__(self, data, proper_keys, *args):
+        """Initialize with the invalid key."""
+        self.data = data
+        self.proper_keys = proper_keys
+        self.given_keys = data.keys()
+        self.message = ("JSON input, '{}', does not have valid keys. "
+                        "'{}' must include {} but instead has {}.").format(
+                            data, data, proper_keys, self.given_keys)
+        super().__init__(
+            self.message, data, proper_keys, self.given_keys, *args)
 
 
 class JSONSerializable(metaclass=ABCMeta):

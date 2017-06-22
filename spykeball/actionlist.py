@@ -1,13 +1,13 @@
 """ActionList Class."""
 
-from spykeball.core import io
-from spykeball.core import util
-from spykeball.core.exception import (
-    PlayerException,
-    JSONKeyError,
-)
-from spykeball.player import Player
-from spykeball.action.touchmap import parse
+from spykeball import io
+from spykeball import util
+
+from spykeball import PlayerException
+from spykeball import JSONKeyError
+
+from spykeball import Player
+from spykeball import touchmap
 
 
 class ActionList(util.PlayerInterface, io.JSONSerializable):
@@ -19,7 +19,7 @@ class ActionList(util.PlayerInterface, io.JSONSerializable):
         self._action_strings = list(actions)
 
         if p1 and p2 and p3 and p4:
-            self._actionlist = parse(p1, p2, p3, p4, *actions)
+            self._actionlist = touchmap.parse(p1, p2, p3, p4, *actions)
             self._parsed = True
         else:
             self._actionlist = None
@@ -56,7 +56,7 @@ class ActionList(util.PlayerInterface, io.JSONSerializable):
         if isinstance(item, str):
             self._action_strings[key] = item
             if self._parsed:
-                self._actionlist[key] = parse(
+                self._actionlist[key] = touchmap.parse(
                     self._p1, self._p2, self._p3, self._p4, *(item))[0]
         else:
             raise TypeError("Not a valid key.", key, type(key))
@@ -123,7 +123,7 @@ class ActionList(util.PlayerInterface, io.JSONSerializable):
     def register_players(self, ps):
         """Register players and parses ActionList."""
         self.players = ps
-        self._actionlist = parse(
+        self._actionlist = touchmap.parse(
             self._p1, self._p2, self._p3, self._p4, *self._action_strings)
         self._parsed = True
 
@@ -152,7 +152,7 @@ class ActionList(util.PlayerInterface, io.JSONSerializable):
         """Set the actions."""
         self._action_strings = list(acts)
         if self._parsed:
-            self._actionlist = parse(
+            self._actionlist = touchmap.parse(
                 self._p1, self._p2, self._p3, self._p4, *acts)
 
     @property

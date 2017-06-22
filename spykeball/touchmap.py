@@ -2,17 +2,23 @@
 
 from collections import deque
 
-from spykeball.action.touch import (
-    Service,
-    Defense,
-    Set,
-    Spike,
-    TouchError
-)
-from spykeball.core.exception import (
-    PlayerException,
-    TouchMapException,
-)
+from spykeball import PlayerException
+
+from spykeball import Service
+from spykeball import Defense
+from spykeball import Set
+from spykeball import Spike
+from spykeball import TouchError
+
+
+class TouchMapException(Exception):
+    """Raise an exception about a touch map."""
+
+    def __init__(self, message, touch_map, *args):
+        """Initialize with the touch map."""
+        self.touch_map = touch_map
+        self.message = message + " TouchMap: {}".format(touch_map)
+        super().__init__(self.message, touch_map, *args)
 
 
 def parse(p1, p2, p3, p4, *actions):

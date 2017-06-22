@@ -1,11 +1,20 @@
 """Player Library."""
 
-from spykeball.core import io
-from spykeball.core import util
-from spykeball.core.exception import (
-    GameException,
-    JSONKeyError,
-)
+from spykeball import io
+from spykeball import util
+
+from spykeball import GameException
+from spykeball import JSONKeyError
+
+
+class PlayerException(Exception):
+    """Raise an exception about a player."""
+
+    def __init__(self, message, player, *args):
+        """Initialize with the player."""
+        self.player = player
+        self.message = message + " Player: {}".format(player)
+        super().__init__(self.message, player, *args)
 
 
 class Player(util.UIDObject, io.JSONSerializable):

@@ -1,6 +1,16 @@
-"""The spykeball package."""
+"""
+spykeball
 
-# from spykeball.core.exception import *
-from spykeball.game import Game
-from spykeball.player import Player
-from spykeball.action import ActionList
+Usage:
+    spykeball
+
+"""
+
+from docopt import docopt
+
+
+def main():
+    """Spykeball Main CLI Function."""
+    options = docopt(__doc__)
+    for k, v in options.items():
+        pass

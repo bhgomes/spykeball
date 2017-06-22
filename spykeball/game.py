@@ -1,16 +1,26 @@
 """Game Package."""
 
-from spykeball.core import io
-from spykeball.core import util
-from spykeball.core.exception import (
-    GameException,
-    JSONKeyError,
-    PlayerException,
-    TouchMapException,
-)
-from spykeball.player import Player
-from spykeball.stat.model import StatModel, DefaultStatModel
-from spykeball.action.actionlist import ActionList
+from spykeball import io
+from spykeball import util
+
+from spykeball import JSONKeyError
+from spykeball import PlayerException
+from spykeball import TouchMapException
+
+from spykeball import Player
+from spykeball import StatModel
+from spykeball import DefaultStatModel
+from spykeball import ActionList
+
+
+class GameException(Exception):
+    """Raise an exception about a game."""
+
+    def __init__(self, message, game, *args):
+        """Initialize with the game."""
+        self.game = game
+        self.message = message + " Game: {}".format(game)
+        super().__init__(self.message, game, *args)
 
 
 class Game(util.UIDObject, util.PlayerInterface, io.JSONSerializable):
