@@ -2,7 +2,7 @@
 
 from setuptools import setup, find_packages
 
-from spykeball.core.io import findfile
+from spykeball.io import findfile
 
 setup(
     name='spykeball',
