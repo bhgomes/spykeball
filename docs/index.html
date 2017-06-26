@@ -6,70 +6,138 @@
         <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,700,900" rel="stylesheet">
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
         <link rel="stylesheet" href="css/main.css">
+        <style media="screen" class="media">
+            @media (max-height: 760px) {
+                .landingTitle {
+                    margin-top: 0;
+                }
+            }
+
+            @media (max-height: 600px), (max-width: 1680px) {
+                .landingTitle {
+                    font-size: 320px;
+                }
+            }
+
+            @media (max-width: 1450px) {
+                .landingTitle {
+                    font-size: 20vw;
+                }
+                .loginBTN {
+                    font-size: 20px;
+                    padding: 11px 6vw;
+                }
+            }
+
+            @media (max-height: 500px), (max-width: 960px) {
+                .landing {
+                    display: none;
+                }
+                .sizeError {
+                    display: block;
+                }
+
+            }
+        </style>
     </head>
     <body>
-        <div class="landing">
-            <h1 class="landingTitle"><span id="s">s</span><b class="py">py</b><span id="morf">keball</span></h1>
-            <div class="login">
-                <div class="loginBox">
-                    <button class="loginBTN" type="button" onclick="openLogin()">Login</button>
-                    <form>
-                        <legend>welcome to<span>Spykeball</span></legend>
-                        <input class="username loginText" type="text" value="" placeholder="Username" autocomplete="none">
-                        <input class="password loginText" type="password" value="" placeholder="Password">
-                        <!--<input class="submit" type="submit" value="Login">-->
-                        <a class="submit" href="video-tool.html">Login</a>
-                    </form>
-                </div>
-                <script type="text/javascript">
-
-                    function openLogin() {
-                        var btn = document.querySelector('.loginBTN');
-                        btn.style.opacity = '0';
-
-                        var title = document.querySelector('.py');
-                        title.style.top = '-100vh';
-
-                        var s = document.querySelector('#s');
-                        s.style.opacity = '0';
-
-                        var morf = document.querySelector('#morf');
-                        morf.innerHTML = 'Login';
-                        morf.style.fontWeight = '900';
-
-                        var box = document.querySelector('.loginBox');
-                        box.style.height = '480px';
-                        box.style.top = 'calc(50% - 240px)';
-
-                        var form = document.querySelector('.loginBox form');
-                        form.style.opacity = '1';
-
-                        setTimeout(function () {
-                            btn.remove();
-                        }, 0);
-                    }
-                </script>
-            </div>
-            <script type="text/javascript">
-                var box = document.querySelector('.loginBox');
-
-                window.onload = function() {
-                    box.style.top = document.querySelector('.py').offsetTop +  document.querySelector('.py').offsetHeight + 'px';
-                    box.style.left = document.querySelector('.py').offsetLeft + 'px';
-                    box.style.width = document.querySelector('.py').offsetWidth + 'px';
-                    //openLogin();
-                };
-
-                /*window.onresize = function() {
-                    box.style.top = document.querySelector('.py').offsetTop +  document.querySelector('.py').offsetHeight + 'px';
-                    box.style.left = document.querySelector('.py').offsetLeft + 'px';
-                    box.style.width = document.querySelector('.py').offsetWidth + 'px';
-                };*/
-
-            </script>
-
-            <canvas></canvas>
+        <div class="sizeError">
+            <p>To use <span>Spykeball</span>,<br>please visit this site using a larger browser</p>
         </div>
+        <div class="landing">
+            <div class="landingTitle"><span id="s">s</span><b class="py">py</b><span id="morf">keball</span></div>
+            <div class="loginBox">
+                <button class="loginBTN" type="button" onclick="openLogin()">Login</button>
+                <form>
+                    <div class="leg">
+                        <legend>welcome to<span>Spykeball</span></legend>
+                    </div>
+                    <input class="username loginText" type="text" value="" placeholder="Username" autocomplete="off">
+                    <input class="password loginText" type="password" value="" placeholder="Password">
+                    <!--<input class="submit" type="submit" value="Login">-->
+                    <a class="submit" href="video-tool.html">Login</a>
+                </form>
+            </div>
+            <canvas></canvas>
+            <footer>
+                <a class="github" href="https://github.com/bhgomes" target="_blank">
+                    <svg aria-hidden="true" version="1.1" viewbox="0 0 16 16"><path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path></svg>
+                </a>
+            </footer>
+            <!--<div class="floater"></div>-->
+        </div>
+        <script type="text/javascript">
+            var loginOpen;
+
+            function setupBox(open) {
+                var box = document.querySelector('.loginBox');
+                var morf = document.querySelector('#morf');
+
+                if(!open) {
+                    box.style.top = document.querySelector('.py').offsetTop +  document.querySelector('.py').offsetHeight + 'px';
+                    box.style.left = document.querySelector('.py').offsetLeft + 'px';
+                    box.style.width = document.querySelector('.py').offsetWidth + 'px';
+                } else {
+                    box.style.width = document.querySelector('.py').offsetWidth + 'px';
+                    morf.style.left = box.offsetLeft + box.offsetWidth + 50 + 'px';
+                    morf.style.top = 'calc(50vh - ' + morf.offsetHeight / 2 + 'px)';
+                }
+            }
+
+            window.onload = function() {
+                loginOpen = false;
+                setupBox();
+            };
+
+            /*window.onwheel =  function(e) {
+                if (e.deltaY < 0) {
+                    console.log('scrolling up', e.deltaY);
+                }
+                if (e.deltaY > 0) {
+                    console.log('scrolling down', e.deltaY);
+                }
+            };*/
+
+            function openLogin() {
+                loginOpen = true;
+                var btn = document.querySelector('.loginBTN');
+                btn.style.display = 'none';
+
+                var title = document.querySelector('.py');
+                title.style.top = '-885px';
+
+                var box = document.querySelector('.loginBox');
+                box.classList.add('opened');
+                box.style.top = 'calc(50vh - 240px)';
+                box.style.left = '18vw';
+                box.style.transition = 'top 600ms cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+                box.style.webkitTransition = 'top 600ms cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+
+                var morf = document.querySelector('#morf');
+                morf.innerHTML = 'Login';
+                morf.style.fontWeight = '900';
+                morf.style.left = morf.offsetLeft + 'px';
+                morf.style.top = morf.offsetTop + 'px';
+                morf.style.position = 'sticky';
+
+
+                var s = document.querySelector('#s');
+                s.style.opacity = '0';
+
+
+
+                var form = document.querySelector('.loginBox form');
+                form.style.opacity = '1';
+
+                setTimeout(function() {
+                    box.style.transition = 'none';
+                    box.style.webkitTransition = 'none';
+                    morf.style.position = 'absolute';
+                    morf.style.left = box.offsetLeft + box.offsetWidth + 50 + 'px';
+                    morf.style.top = 'calc(50vh - ' + morf.offsetHeight / 2 + 'px)';
+                }, 600);
+            }
+        </script>
         <script src="canvas.js" charset="utf-8"></script>
     </body>
 </html>
