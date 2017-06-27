@@ -339,15 +339,22 @@ nav i {
     width: 300px;
     height: 40px;
     font-size: 15px;
-    background: var(--feild-color);
-    border-radius: 4px;
+    background: #f3f3f3;
+    border-radius: 6px;
     margin-top: var(--margin);
-    padding: 0 10px;
-    transition: border-color 300ms;
+    padding: 0 12px;
+    border: 2px solid #fff;
+    transition: border-color 300ms, background 300ms;
 }
 
 .youtubeUrl:focus {
-    background: var(--feild-color);
+    border-color: #000;
+    background: #fff;
+    border-radius: 4px;
+}
+
+.invalid:focus {
+    background: #fa6274;
 }
 
 .youtubeInput::after {
@@ -363,15 +370,17 @@ nav i {
     background: #fa6274;
     color: #fff;
     box-shadow: none;
+    margin-left: -2px;
+    padding-right: 34px;
+    width: 278px;
 }
 
 .youtubeInput .xout {
     position: relative;
     width: 34px;
     top: 7px;
-    margin-left: -37px;
+    margin-left: -40px;
     color: #fff;
-    background: #fa6274;
     cursor: pointer;
 }
 
@@ -527,7 +536,7 @@ nav i {
 }
 
 .reset:hover {
-    background: #f22;
+    background: #fa4027;
 }
 
 .download {
@@ -537,5 +546,5 @@ nav i {
 }
 
 .download:hover {
-    background: #26dd1d;
+    background: #44bf4e;
 }
