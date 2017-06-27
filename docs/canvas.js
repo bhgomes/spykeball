@@ -4,12 +4,25 @@ var c = canvas.getContext('2d');
 canvas.width = innerWidth;
 canvas.height = innerHeight;
 
-addEventListener('resize',  function() {
+window.onresize = function() {
+	setupBox(loginOpen); // from the js in index.html
+
 	canvas.width = innerWidth;
 	canvas.height = innerHeight;
 
 	init();
-});
+};
+
+var isPaused = false;
+
+window.onblur = function() {
+    isPaused = true;
+};
+
+window.onfocus = function() {
+    isPaused = false;
+	animate();
+};
 
 function rand(min, max) {
 	return Math.floor(Math.random() * (max - min + 1) + min);
@@ -48,7 +61,7 @@ function Circle(x, y, r, color) {
 var circles;
 function init() {
     circles = [];
-    for(var i = 0; i < rand(30, 60); i++) {
+    for(var i = 0; i < rand(30, 90); i++) {
         var r  = rand(5, 25);
         var x  = rand(r, canvas.width - r);
         var y  = rand(0, canvas.height - r);
@@ -57,9 +70,13 @@ function init() {
 }
 
 function animate() {
-	requestAnimationFrame(animate);
 	c.clearRect(0, 0, canvas.width, canvas.height);
     for (var i = 0; i < circles.length; i++) circles[i].update();
+	requestAnimationFrame(function() {
+		if(!isPaused) {
+			animate();
+		}
+	});
 }
 
 init();
