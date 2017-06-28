@@ -1,17 +1,18 @@
-"""Statistics Module."""
+"""Statistics Modeling Module."""
+
+__all__ = ['StatModel', 'DefaultStatModel']
 
 from abc import ABCMeta, abstractmethod
+from collections import defaultdict
 
-from spykeball import io
-from spykeball import util
+from . import io
+from . import util
 
-from spykeball import PlayerException
-from spykeball import TouchException
+from .io import JSONKeyError
+from .player import PlayerException
+from .touch import TouchException
 
-from spykeball import Defense
-from spykeball import Set
-from spykeball import Spike
-from spykeball import Service
+from .touch import Defense, Set, Spike, Service
 
 
 class StatModel(io.JSONSerializable, metaclass=ABCMeta):
@@ -25,29 +26,23 @@ class StatModel(io.JSONSerializable, metaclass=ABCMeta):
         if model is None:
             StatModel.__stat_model_registry[name] = cls
         else:
+            # think about this
             raise NameError("No two StatModels can have the same name.", name)
         return super().__new__(name, bases, attr)
 
     @staticmethod
-    def touch_components(action_list, player):
+    def touch_components(game, player):
         """Return the relevant touch_components for each player."""
-        actions = action_list[player]
+        actions = game[player]
 
         if actions is None:
-            raise PlayerException("Player is not part of the ActionList.",
-                                  player,
-                                  action_list)
+            raise PlayerException("Player is not part of the Game.",
+                                  player, game)
 
-        performed = actions.get("actor")
-        recieved = actions.get("target")
+        performed = actions.get('actor')
+        recieved = actions.get('target')
 
-        components = ['aces', 'aced', 'serves_made', 'serve_total',
-                      'serve_ratio', 'spikes_returned', 'spike_total',
-                      'spike_ratio', 'd_touch_r', 'd_touch_nr', 'missed_sets',
-                      'missed_spikes', 'missed_total', 'tough_touch'
-                      ]
-
-        count = dict(zip(components, [0] * len(components)))
+        count = defaultdict(int)
 
         for act in performed:
             if isinstance(act, Service):
@@ -61,13 +56,11 @@ class StatModel(io.JSONSerializable, metaclass=ABCMeta):
                     count['d_touch_r'] += 1
                 else:
                     count['d_touch_nr'] += 1
-
                 if act.strength == 'w':
                     count['tough_touch'] += 1
             elif isinstance(act, Set):
                 if not act.success:
                     count['missed_sets'] += 1
-
                 if act.strength == 'w':
                     count['tough_touch'] += 1
             elif isinstance(act, Spike):
@@ -77,8 +70,7 @@ class StatModel(io.JSONSerializable, metaclass=ABCMeta):
                     count['missed_spikes'] += 1
                 count['spike_total'] += 1
             else:
-                raise TouchException(
-                    "Action must be of subtype _AbstractTouch", act)
+                raise TouchException("Action must be a subtype of Touch.", act)
 
         for act in recieved:
             if isinstance(act, Service):
@@ -91,31 +83,39 @@ class StatModel(io.JSONSerializable, metaclass=ABCMeta):
             elif isinstance(act, Spike):
                 pass
             else:
-                raise TouchException(
-                    "Action must be of subtype _AbstractTouch", act)
+                raise TouchException("Action must be a subtype of Touch.", act)
 
-        count['serve_ratio'] = count['serves_made'] / count['serve_total']
-        count['spike_ratio'] = count['spikes_returned'] / count['spike_total']
+        try:
+            count['serve_ratio'] = count['serves_made'] / count['serve_total']
+        except ArithmeticError:
+            count['serve_ratio'] = 0.0
+
+        try:
+            count['spike_ratio'] = (count['spikes_returned'] /
+                                    count['spike_total'])
+        except ArithmeticError:
+            count['spike_ratio'] = 0.0
+
         count['missed_total'] = count['missed_sets'] + count['missed_spikes']
 
         return count
 
-    @staticmethod
+    @classmethod
     @abstractmethod
-    def calculate(action_list, precision=4):
+    def calculate(cls, game, precision=4):
         """Perform the stat calculations and register player stat."""
-        return {"p1": None, "p2": None, "p3": None, "p4": None}
+        return {'p1': None, 'p2': None, 'p3': None, 'p4': None}
 
     @classmethod
     def to_json(cls):
         """Encode the object into valid JSON."""
-        return {"UID": None, "name": cls.__name__}
+        return {'UID': None, 'name': cls.__name__}
 
     @classmethod
     def from_json(cls, data):
         """Decode the object from valid JSON."""
         model = None
-        if util.has_keys(data, 'UID', 'name'):
+        if util.has_keys(data, 'UID', 'name', error=JSONKeyError):
             model = StatModel.__stat_model_registry.get(data['name'])
             if model is None:
                 raise NameError("Model not found.", data['name'])
@@ -124,53 +124,35 @@ class StatModel(io.JSONSerializable, metaclass=ABCMeta):
 
 
 class Model1(StatModel):
-    """Current Model as of 6/20/17."""
+    """Current Model as of 6/25/17."""
 
-    def calculate(action_list, precision=4):
+    @classmethod
+    def calculate(cls, game, precision=4):
         """Perform the stat calculations and register player stat."""
-        stats = {
-            action_list.p1: None,
-            action_list.p2: None,
-            action_list.p3: None,
-            action_list.p4: None
-        }
+        stats = defaultdict(type(None))
 
-        length = len(action_list)
-
+        length = len(game)
         game_length_weight = 1 if length <= 39 else 39.0 / length
 
-        for player in stats.keys():
-            components = Model1.touch_components(action_list, player)
+        for player in game.players.values():
+            touchcomp = cls.touch_components(game, player)
 
-            try:
-                hitting = 20 * (1 - components['spike_ratio'])
-            except ArithmeticError:
-                hitting = 0.0
+            hitting = 20 * (1 - touchcomp['spike_ratio'])
 
-            try:
-                defense = (components['d_touch_nr'] + 0.4 * hitting *
-                           components['d_touch_r']) * game_length_weight
-            except ArithmeticError:
-                defense = 0.0
+            defense = (touchcomp['d_touch_nr'] + 0.4 * hitting *
+                       touchcomp['d_touch_r']) * game_length_weight
 
-            try:
-                serving = (5.5 * components['aces'] + 15 *
-                           components['serve_ratio'])
-            except ArithmeticError:
-                serving = 0.0
+            serving = 5.5 * touchcomp['aces'] + 15 * touchcomp['serve_ratio']
 
-            try:
-                cleanliness = (20 - 5 * components['missed_total'] - 2 * (
-                    components['tough_touch'] + components['aced']))
-            except ArithmeticError:
-                cleanliness = 0.0
+            cleanliness = (20 - 5 * touchcomp['missed_total'] - 2 * (
+                touchcomp['tough_touch'] + touchcomp['aced']))
 
             stats[player] = {
-                "hitting": round(hitting, precision),
-                "defense": round(defense, precision),
-                "serving": round(serving, precision),
-                "cleanliness": round(cleanliness, precision),
-                "total": round(hitting + defense + serving + cleanliness,
+                'hitting': round(hitting, precision),
+                'defense': round(defense, precision),
+                'serving': round(serving, precision),
+                'cleanliness': round(cleanliness, precision),
+                'total': round(hitting + defense + serving + cleanliness,
                                precision)
             }
 
@@ -178,8 +160,4 @@ class Model1(StatModel):
 
 
 class DefaultStatModel(Model1):
-    """The Default Stat Model."""
-
-
-class StatModelRegister(object):
-    """Return a StatModel from the Name."""
+    """The Current Default StatModel."""

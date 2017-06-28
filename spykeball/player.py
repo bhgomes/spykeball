@@ -1,30 +1,28 @@
 """Player Library."""
 
-from spykeball import io
-from spykeball import util
+__all__ = ['PlayerMap', 'PlayerException', 'Player']
 
-from spykeball import GameException
-from spykeball import JSONKeyError
+from collections import namedtuple
+
+from . import io
+from . import util
+
+
+PlayerMap = namedtuple('PlayerMap', ['p1', 'p2', 'p3', 'p4'])
 
 
 class PlayerException(Exception):
     """Raise an exception about a player."""
 
-    def __init__(self, message, player, *args):
-        """Initialize with the player."""
-        self.player = player
-        self.message = message + " Player: {}".format(player)
-        super().__init__(self.message, player, *args)
-
 
 class Player(util.UIDObject, io.JSONSerializable):
     """An object representing a Spikeball Player."""
 
-    def __init__(self, name, object_uid=None):
+    def __init__(self, name=None, object_uid=None):
         """Initialize Player."""
-        super().__init__(object_uid)
         self._name = name
         self._stats = {}
+        super().__init__(object_uid)
 
     def __str__(self):
         """Return name of the player or UID if name is empty."""
@@ -36,9 +34,9 @@ class Player(util.UIDObject, io.JSONSerializable):
         return self._name
 
     @name.setter
-    def name(self, new_name):
+    def name(self, other):
         """Set the players name."""
-        self._name = new_name
+        self._name = other
 
     @property
     def stats(self):
@@ -46,21 +44,21 @@ class Player(util.UIDObject, io.JSONSerializable):
         return self._stats
 
     @property
-    def games_played(self):
+    def history(self):
         """Return the games that this person has participated in."""
         return tuple(self._stats.keys())
 
-    def add_game(self, game, stat_model=None):
+    def add_game(self, game, stat_model=None, override=False):
         """Add a game to the player's statistics."""
-        # check this resolution
-        if game.UID not in self.stats.keys() or not game.stats_saved:
-            self._stats[game.UID] = {
-                "stat": game.player_stat(self, stat_model=stat_model),
-                "model": game.stat_model
-            }
-        else:
-            # consider ignoring this exception
-            raise GameException("Game already Registered.", game)
+        if not override and (game.UID in self._stats or game.stats_saved):
+            return False
+
+        self._stats[game.UID] = {
+            "stat": game.player_stat(self, stat_model=stat_model),
+            "model": game.stat_model
+        }
+
+        return True
 
     def to_json(self, with_stats=False):
         """Encode the object into valid JSON."""
@@ -73,10 +71,10 @@ class Player(util.UIDObject, io.JSONSerializable):
     def from_json(cls, data, with_stats=False):
         """Decode the object from valid JSON."""
         player = None
-        if util.has_keys(data, 'name', 'UID', error=JSONKeyError):
+        if util.has_keys(data, 'name', 'UID', error=io.JSONKeyError):
             player = cls(data['name'], object_uid=data['UID'])
 
-        if with_stats and util.has_keys(data, 'stats', error=JSONKeyError):
+        if with_stats and util.has_keys(data, 'stats', error=io.JSONKeyError):
             for game_id, stat in data['stats'].items():
                 player._stats[game_id] = stat
 
@@ -89,4 +87,4 @@ class Player(util.UIDObject, io.JSONSerializable):
     @classmethod
     def load(cls, fp, with_stats=True):
         """Load a player's progress from a file."""
-        super().load(fp, with_stats)
+        return super().load(fp, with_stats)

@@ -1,13 +1,16 @@
 """Spykeball IO Module."""
 
+__all__ = ['readsplitby', 'ext_matches', 'findfile', 'JSONKeyError',
+           'JSONSerializable']
+
 import json
 
 from abc import ABCMeta, abstractmethod
 
-from spykeball import util
+from . import util
 
 
-def readsplit(fp, *delimeters, buffer_size=4096):
+def readsplitby(fp, *delimeters, buffer_size=4096):
     """Read a file and yield the content separated by delimeters."""
     if len(delimeters) == 0:
         delimeters = ('\n')
