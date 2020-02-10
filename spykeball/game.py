@@ -10,7 +10,7 @@ from . import touch
 
 from .io import JSONKeyError
 from .player import PlayerException
-from .touch import TouchMapException
+from .touch import RallyException
 
 from .player import Player, PlayerMap
 from .model import StatModel, DefaultStatModel
@@ -26,17 +26,17 @@ class GameException(Exception):
 class Game(util.UIDObject, io.JSONSerializable):
     """Game Object."""
 
-    def __init__(self, p1, p2, p3, p4,
-                 actions=None,
-                 stat_model=DefaultStatModel,
-                 object_uid=None,
-                 autoplay=False):
+    def __init__(self, playermap, actions=None, stat_model=DefaultStatModel,
+                 object_uid=None, autoplay=False):
         """Initialize Game Object."""
-        self.players = p1, p2, p3, p4
+        self.players = playermap
         self._stat_model = stat_model
         # convert to defaultdict?
         self._stats = {
-            p1: None, p2: None, p3: None, p4: None,
+            playermap.p1: None,
+            playermap.p2: None,
+            playermap.p3: None,
+            playermap.p4: None,
             'score': {'home': None, 'away': None}, 'winner': None
         }
         self.actions = actions
@@ -58,56 +58,56 @@ class Game(util.UIDObject, io.JSONSerializable):
 
     def __next__(self):
         """Return the next item in the iterator."""
-        try:
-            next_point = self._actionlist[self._index]
-        except IndexError:
+        if not self._rallylist:
             raise StopIteration
-        self._index += 1
-        return next_point
+        return next(self._rallylist)
 
     def __len__(self):
         """Return length of the game."""
-        return len(self._actionlist) if self._actionlist else 0
+        return len(list(self._rallylist)) if self._rallylist else 0
 
     def __contains__(self, item):
         """Check if player is in the game or if touchmap is in the game."""
         if isinstance(item, Player):
             return item in self._players
         elif isinstance(item, str):
-            return (self._actionlist_strings
-                    and item in self._actionlist_strings)
+            return (self._rallylist_strings
+                    and item in self._rallylist_strings)
+        elif isinstance(item, touch.Rally):
+            return self._rallylist and item in self._rallylist
         elif isinstance(item, touch.Touch):
-            return self._actionlist and item in self._actionlist
+            return (self._rallylist and
+                    any(item in rally.touches for rally in self._rallylist))
         else:
             return False
 
     def __getitem__(self, index):
         """Get the item given by the index."""
         if isinstance(index, Player):
-            if not self._actionlist:
-                raise TouchMapException("TouchMap is not parsed.")
-            if index not in self._players.values():
+            if not self._rallylist:
+                raise RallyException("Rally is not parsed.")
+            if index not in self._players:
                 raise PlayerException("Player '{}' not in Game.".format(index))
             participant_actions = {'actor': [], 'target': []}
-            for play in self._actionlist:
-                for action in play:
-                    if action.actor == index:
-                        participant_actions['actor'].append(action)
-                    if action.target == index:
-                        participant_actions['target'].append(action)
+            for rally in self._rallylist:
+                participant_actions['actor'] = list(
+                    rally_select_actor(rally, index))
+                participant_actions['target'] = list(
+                    rally_select_target(rally, index))
             return participant_actions
         elif isinstance(index, str):
             if index in ('p1', 'p2', 'p3', 'p4'):
+                # fix
                 return self._players[index]
-            elif index in self._actionlist_strings:
-                return self._actionlist[self._actionlist_strings.index(index)]
+            elif index in self._rallylist_strings:
+                return self._rallylist[self._rallylist_strings.index(index)]
             else:
                 raise IndexError("Object '{}' not in Game.".format(index))
         elif isinstance(index, int):
-            if self._actionlist:
-                return self._actionlist[index]
+            if self._rallylist:
+                return self._rallylist[index]
             else:
-                raise TouchMapException("TouchMap is not parsed.")
+                raise RallyException("Rally is not parsed.")
         else:
             raise IndexError("Object '{}' not in Game.".format(index))
 
@@ -130,12 +130,12 @@ class Game(util.UIDObject, io.JSONSerializable):
                 raise IndexError("Object '{}' not in Game.".format(index))
         elif isinstance(index, int):
             if isinstance(value, str):
-                self._actionlist[index] = touch.parse_point(value,
-                                                            self._players)
-                self._actionlist_strings[index] = value
+                self._rallylist[index] = touch.parse_point(value,
+                                                           self._players)
+                self._rallylist_strings[index] = value
             elif isinstance(value, touch.Touch):
-                self._actionlist[index] = value
-                # self._actionlist_strings[index] = touch.unparse_point(value)
+                self._rallylist[index] = value
+                # self._rallylist_strings[index] = touch.unparse_point(value)
                 raise NotImplementedError("IDK")
             else:
                 raise util.default_typeerror(value, str, touch.Touch)
@@ -151,42 +151,54 @@ class Game(util.UIDObject, io.JSONSerializable):
     @property
     def p1(self):
         """Return Player 1."""
-        return self._players['p1']
+        return self._players.p1
 
     @p1.setter
     def p1(self, other):
         """Set Player 1."""
-        self._players['p1'] = other
+        self._players = PlayerMap(other,
+                                  self._players.p2,
+                                  self._players.p3,
+                                  self._players.p4)
 
     @property
     def p2(self):
         """Return Player 2."""
-        return self._players['p2']
+        return self._players.p2
 
     @p2.setter
     def p2(self, other):
         """Set Player 2."""
-        self._players['p2'] = other
+        self._players = PlayerMap(self._players.p1,
+                                  other,
+                                  self._players.p3,
+                                  self._players.p4)
 
     @property
     def p3(self):
         """Return Player 3."""
-        return self._players['p3']
+        return self._players.p3
 
     @p3.setter
     def p3(self, other):
         """Set Player 3."""
-        self._players['p3'] = other
+        self._players = PlayerMap(self._players.p1,
+                                  self._players.p2,
+                                  other,
+                                  self._players.p4)
 
     @property
     def p4(self):
         """Return Player 4."""
-        return self._players['p4']
+        return self._players.p4
 
     @p4.setter
     def p4(self, other):
         """Set Player 4."""
-        self._players['p4'] = other
+        self._players = PlayerMap(self._players.p1,
+                                  self._players.p2,
+                                  self._players.p3,
+                                  other)
 
     @property
     def players(self):
@@ -198,31 +210,35 @@ class Game(util.UIDObject, io.JSONSerializable):
         """Set the players."""
         util.typecheck(ps, list, tuple, dict)
         if isinstance(ps, (list, tuple)) and len(ps) == 4:
-            self._players = dict(zip(('p1', 'p2', 'p3', 'p4'), ps))
-        elif util.haskeys(ps, 'p1', 'p2', 'p3', 'p4', error=JSONKeyError):
-            self._players = ps
+            self._players = PlayerMap(ps[0], ps[1], ps[2], ps[3])
+        elif util.haskeys(ps, 'p1', 'p2', 'p3', 'p4', error=KeyError):
+            self._players = PlayerMap(ps['p1'], ps['p2'], ps['p3'], ps['p4'])
 
     @property
     def home_team(self):
         """Return home team of the game."""
-        return Team(p1=self._players['p1'], p2=self._players['p2'])
+        return Team(p1=self.p1, p2=self.p2)
 
     @home_team.setter
     def home_team(self, other):
         """Set the home team."""
-        self._players['p1'] = other[0]
-        self._players['p2'] = other[1]
+        self._players = PlayerMap(other[0],
+                                  other[1],
+                                  self._players.p3,
+                                  self._players.p4)
 
     @property
     def away_team(self):
         """Return away team of the game."""
-        return Team(p1=self._players['p3'], p2=self._players['p4'])
+        return Team(p1=self._players.p3, p2=self._players.p4)
 
     @away_team.setter
     def away_team(self, other):
         """Set the away team."""
-        self._players['p3'] = other[0]
-        self._players['p4'] = other[1]
+        self._players = PlayerMap(self._players.p1,
+                                  self._players.p2,
+                                  other[0],
+                                  other[1])
 
     @property
     def stat_model(self):
@@ -238,30 +254,23 @@ class Game(util.UIDObject, io.JSONSerializable):
     @property
     def actions(self):
         """Return the action list."""
-        return self._actionlist
+        return self._rallylist
 
     @actions.setter
     def actions(self, other):
         """Set the action list."""
-        util.typecheck(other, list, tuple, type(None))
         if util.isinnertype(other, str):
-            self._actionlist_strings = other
+            self._rallylist_strings = other
             other = touch.parse(other, self._players)
             self._parsed = True
-        elif util.isinnertype(other, touch.Touch):
-            for play in other:
-                for action in play:
-                    if (action.actor not in self._players.values()
-                            or action.target not in self._players.values()):
-                        raise TouchMapException(
-                            "Player Mismatch. TouchMap has players "
-                            "that are not in '{}'.".format(self))
+        elif util.isinnertype(other, touch.Rally):
+            other = touch.inject(other, self._players)
             self._parsed = True
         elif other is None:
             self._parsed = False
         else:
             raise util.default_typeerror(other, list, tuple, type(None))
-        self._actionlist = other
+        self._rallylist = other
         self._reset_game_flags()
 
     @property
@@ -309,22 +318,22 @@ class Game(util.UIDObject, io.JSONSerializable):
             self.action = touches
         elif self._played and self._stats_saved:
             raise GameException("Game has already been played with "
-                                "these touches.", self._actionlist_strings)
+                                "these touches.", self._rallylist_strings)
 
         if not self._played:
-            if self._actionlist is None:
+            if self._rallylist is None:
                 raise GameException("No touches registered.", self)
 
             service = self.home_team
             other = self.away_team
             score = {service: 0, other: 0}
 
-            for action in self:
-                if action[0].actor not in service:
-                    raise TouchMapException("Wrong team serving.",
-                                            action, self._actionlist)
-                player = action[-1].actor
-                success = action[-1].success
+            for rally in self:
+                if rally.touches[0].actor not in service:
+                    raise RallyException("Wrong team serving.",
+                                         rally, self._rallylist)
+                player = rally.touches[-1].actor
+                success = rally.touches[-1].success
 
                 if ((success and player not in service)
                         or (not success and player in service)):
@@ -342,7 +351,7 @@ class Game(util.UIDObject, io.JSONSerializable):
             self._played = True
 
         if save_stats and not self._stats_saved:
-            for player in self._players.values():
+            for player in self._players:
                 player.add_game(self, override=True)
             self._stats_saved = True
 
@@ -372,7 +381,7 @@ class Game(util.UIDObject, io.JSONSerializable):
         game = {
             'UID': self.UID,
             'teams': {'home': self.home_team, 'away': self.away_team},
-            'actions': self._actionlist_strings
+            'actions': self._rallylist_strings
         }
 
         if game_played and self._played:
@@ -398,11 +407,15 @@ class Game(util.UIDObject, io.JSONSerializable):
         if util.haskeys(data, 'UID', 'teams', 'actions', error=JSONKeyError):
             teams = data['teams']
             if util.haskeys(teams, 'home', 'away', error=JSONKeyError):
-                game = cls(
+                playermap = PlayerMap(
                     Player.from_json(teams['home'][0]),
                     Player.from_json(teams['home'][1]),
                     Player.from_json(teams['away'][0]),
                     Player.from_json(teams['away'][1]),
+                    )
+
+                game = cls(
+                    playermap,
                     actions=data['actions'],
                     stat_model=DefaultStatModel,
                     object_uid=data['UID']

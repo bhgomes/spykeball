@@ -47,5 +47,5 @@ setup(
         'console_scripts': [
             'spykeball=spykeball:main',
         ],
-    }
+    },
 )

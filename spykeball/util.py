@@ -87,29 +87,34 @@ def randstring(n=1, source=None):
 class UIDObject(object):
     """A Unique Identifier for Each Subclass."""
 
-    __obj_uid_list = []
+    _obj_uid_list = []
 
     def __init__(self, object_uid=None, **kwargs):
         """Create the object_uid."""
-        self.__object_uid = object_uid
+        self._object_uid = object_uid
 
-        if object_uid in self.__obj_uid_list:
+        if object_uid in self.__class__._obj_uid_list:
             raise IndexError("No two UIDObjects can have the same object_uid.",
                              self, object_uid)
         else:
-            self.__object_uid = self.generate_uid(seed=object_uid)
-        self.__obj_uid_list.append(self.__object_uid)
+            self._object_uid = self.generate_uid(seed=object_uid)
+        self.__class__._obj_uid_list.append(self._object_uid)
         super().__init__(**kwargs)
+
+    def __del__(self):
+        """Deleting a UIDObject removes its id from the __obj_uid_list."""
+        index = self.__class__._obj_uid_list.index(self.UID)
+        del self.__class__._obj_uid_list[index]
 
     @property
     def UID(self):
         """Return the object_uid for this Object."""
-        return self.__object_uid
+        return self._object_uid
 
     @property
     def UID_num(self):
         """Return the numeric component of the object_uid for this Object."""
-        return int(''.join(self.__object_uid.split('-')[1:]))
+        return int(''.join(self._object_uid.split('-')[1:]))
 
     @classmethod
     def generate_uid(cls, seed=None):
@@ -137,7 +142,7 @@ class UIDObject(object):
         else:
             test_uid = ''
             first_loop = True
-            while first_loop or test_uid in cls.__obj_uid_list:
+            while first_loop or test_uid in cls._obj_uid_list:
                 first_loop = False
                 num_list = []
                 for _ in range(0, random.randrange(1, random.randrange(4, 8))):

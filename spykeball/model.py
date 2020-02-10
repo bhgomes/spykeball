@@ -134,7 +134,7 @@ class Model1(StatModel):
         length = len(game)
         game_length_weight = 1 if length <= 39 else 39.0 / length
 
-        for player in game.players.values():
+        for player in game.players:
             touchcomp = cls.touch_components(game, player)
 
             hitting = 20 * (1 - touchcomp['spike_ratio'])

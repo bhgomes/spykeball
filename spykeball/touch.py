@@ -1,9 +1,10 @@
 """Touch Classes."""
 
 __all__ = ['TouchException', 'Touch', 'Service', 'Defense', 'Set', 'Spike',
-           'ErrorTouch', 'TOUCHMAP_LEXICON', 'TouchMapException',
-           'parse_point', 'parse', 'TouchMapVerify', 'valid_touchmap',
-           'valid_touchlist', 'load']
+           'ErrorTouch', 'TOUCH_LEXICON', 'Rally', 'RallyException',
+           'rally_parse', 'parse', 'rally_validate', 'validate',
+           'rally_inject', 'inject', 'rally_select_actor',
+           'rally_select_target', 'rally_select', 'select', 'load']
 
 from collections import deque, namedtuple
 from copy import deepcopy
@@ -14,9 +15,9 @@ from . import io
 from . import util
 
 from .io import JSONKeyError
-
 from .player import PlayerException
-from .player import Player
+
+from .player import Player, PlayerMap
 
 
 class TouchException(Exception):
@@ -230,22 +231,21 @@ class ErrorTouch(Enum):
         self.message = message
 
 
-TOUCHMAP_LEXICON = '1234aefnpsw'
+TOUCH_LEXICON = '1234aefnpsw'
 
 
-class TouchMapException(Exception):
-    """Raise an exception about a touch map."""
+Rally = namedtuple('Rally', ['playermap', 'touches'])
 
 
-def parse_point(point, playermap):
+class RallyException(Exception):
+    """Raise an exception about a rally."""
+
+
+def rally_parse(rally, playermap):
     """Parse an action."""
-    util.typecheck(point, str)
-    util.typecheck(playermap, dict)
-    util.haskeys(playermap, 'p1', 'p2', 'p3', 'p4', error=KeyError)
-    util.isinnertype(playermap.values(), Player, error=TypeError)
 
     def pmap(pindex):
-        valid_player = playermap.get('p' + pindex)
+        valid_player = playermap[int(pindex) - 1]
         if valid_player is None:
             raise PlayerException("Player is not part of this player list.",
                                   pindex, playermap.values())
@@ -259,16 +259,16 @@ def parse_point(point, playermap):
     same_team = '12'
     other_team = '34'
 
-    action_deque = deque(point)
+    action_deque = deque(rally)
 
     def next_touch():
         return action_deque.popleft()
 
     def is_deque_empty(error_on=False):
         if error_on and not action_deque:
-            raise TouchMapException("No ending character.", point)
+            raise RallyException("No ending character.", rally)
         elif action_deque:
-            raise TouchMapException("Touch past end of play.", point)
+            raise RallyException("Touch past end of play.", rally)
 
     def set_focus(player):
         nonlocal focus
@@ -281,8 +281,8 @@ def parse_point(point, playermap):
             if focus in other_team:
                 same_team, other_team = other_team, same_team
             else:
-                raise TouchMapException("Team collision.",
-                                        point, focus, same_team, other_team)
+                raise RallyException("Team collision.",
+                                     rally, focus, same_team, other_team)
 
     while len(action_deque) != 0:
         if touch is Service:
@@ -299,15 +299,15 @@ def parse_point(point, playermap):
                                            target=pmap(target),
                                            is_ace=True))
                 else:
-                    raise TouchMapException("Player cannot ace a teammate.",
-                                            point)
+                    raise RallyException("Player cannot ace a teammate.",
+                                         rally)
                 is_deque_empty(error_on=False)
             elif modifier in other_team:
                 touches.append(Service(pmap(focus), target=pmap(modifier)))
                 set_focus(modifier)
                 touch = Defense
             else:
-                raise TouchMapException("Invalid character.", point)
+                raise RallyException("Invalid character.", rally)
 
         else:
             modifier = next_touch()
@@ -337,15 +337,15 @@ def parse_point(point, playermap):
                     if target in same_team:
                         error = ErrorTouch.FutureMistake
                     else:
-                        raise TouchMapException("Invalid character.", point)
+                        raise RallyException("Invalid character.", rally)
 
                 if target in same_team or target in other_team:
                     if target in same_team and touch is Spike:
                         if target == focus:
                             error = ErrorTouch.DoubleTouch
                         else:
-                            raise TouchMapException(
-                                "Player cannot spike a teammate.", point)
+                            raise RallyException(
+                                "Player cannot spike a teammate.", rally)
 
                     if target in other_team:
                         touch = Spike
@@ -358,72 +358,101 @@ def parse_point(point, playermap):
                     touch = touch._next
 
                 else:
-                    raise TouchMapException("Invalid character.", point)
+                    raise RallyException("Invalid character.", rally)
 
-    return touches
-
-
-def parse(actions, playermap):
-    """Parse strings of actions into Touches."""
-    return [parse_point(point, playermap) for point in actions]
+    return Rally(playermap, touches)
 
 
-TouchMapVerify = namedtuple('TouchMapVerify', ['valid', 'inject'])
+def parse(rallies, playermap):
+    """Parse strings of rallies into their constituant Touches."""
+    for rally in rallies:
+        yield rally_parse(rally, playermap)
 
 
-def valid_touchmap(point):
-    """Return true if the point can be parsed and a valid parsing."""
-    touchmap = None
-    playermap = {
-        'p1': Player('p1'),
-        'p2': Player('p2'),
-        'p3': Player('p3'),
-        'p4': Player('p4')
-    }
+def rally_validate(rally):
+    """Return the rally if it can be parsed, else return an empty rally."""
+    parsed_rally = None
+    playermap = PlayerMap(
+        Player('p1'),
+        Player('p2'),
+        Player('p3'),
+        Player('p4')
+    )
+
     try:
-        touchmap = parse_point(point, playermap)
+        parsed_rally = rally_parse(rally, playermap)
     except Exception:
-        touchmap = None
+        parsed_rally = None
 
-    def inject(tm, playermap):
-        for action in tm:
-            if action.actor.name == 'p1':
-                action.actor = playermap['p1']
-            elif action.actor.name == 'p2':
-                action.actor = playermap['p2']
-            elif action.actor.name == 'p3':
-                action.actor = playermap['p3']
-            elif action.actor.name == 'p4':
-                action.actor = playermap['p4']
-
-            if action.target.name == 'p1':
-                action.target = playermap['p1']
-            elif action.target.name == 'p2':
-                action.target = playermap['p2']
-            elif action.target.name == 'p3':
-                action.target = playermap['p3']
-            elif action.target.name == 'p4':
-                action.target = playermap['p4']
-
-    if touchmap is None:
-        return TouchMapVerify(False, lambda: None)
-    else:
-        return TouchMapVerify(True, lambda pmap: inject(touchmap, pmap))
+    return Rally(playermap, parsed_rally)
 
 
-def valid_touchlist(actions):
-    """Return true if the actions can be parsed into valid points."""
-    touches = (valid_touchmap(action) for action in actions)
-    if all(touchmap.valid for touchmap in touches):
-        return TouchMapVerify(True, lambda pmap: map(
-            lambda act: act.inject(pmap), touches))
-    else:
-        return TouchMapVerify(False, lambda: None)
+def validate(rallies):
+    """Validate the set of rallies."""
+    for rally in rallies:
+        yield rally_validate(rally)
+
+
+def rally_inject(rally, playermap):
+    """Replace the players of the rally with those in the playermap."""
+    if rally.playermap != playermap:
+        for touch in rally.touches:
+            if touch.actor.UID == rally.playermap.p1.UID:
+                touch.actor = playermap.p1
+            elif touch.actor.UID == rally.playermap.p2.UID:
+                touch.actor = playermap.p2
+            elif touch.actor.UID == rally.playermap.p3.UID:
+                touch.actor = playermap.p3
+            elif touch.actor.UID == rally.playermap.p4.UID:
+                touch.actor = playermap.p4
+
+            if touch.target.UID == rally.playermap.p1.UID:
+                touch.target = playermap.p1
+            elif touch.target.UID == rally.playermap.p2.UID:
+                touch.target = playermap.p2
+            elif touch.target.UID == rally.playermap.p3.UID:
+                touch.target = playermap.p3
+            elif touch.target.UID == rally.playermap.p4.UID:
+                touch.target = playermap.p4
+    return rally
+
+
+def inject(rallies, playermap):
+    """Replace the players of the rally with those in the playermap."""
+    for rally in rallies:
+        yield rally_inject(rally, playermap)
+
+
+def rally_select_actor(rally, player):
+    """Select touches which the player is an actor."""
+    for touch in rally.touches:
+        if touch.actor == player:
+            yield touch
+
+
+def rally_select_target(rally, player):
+    """Select touches which the player is an target."""
+    for touch in rally.touches:
+        if touch.target == player:
+            yield touch
+
+
+def rally_select(rally, player):
+    """Select touches which the player is involved in."""
+    yield from rally_select_actor(rally, player)
+    yield from rally_select_target(rally, player)
+
+
+def select(rallies, player):
+    """Select rallies which the player is involved in."""
+    for rally in rallies:
+        yield from rally_select(rally, player)
 
 
 def load(fp, *delimeters):
-    """Retrieve the touchmaps from a file."""
+    """Retrieve the rallies from a file."""
     if Path(fp).is_file:
         with open(fp, "r+") as file:
-            return [s for s in io.readsplitby(file, ",", "\n", *delimeters)
-                    if s != '']
+            rallies = [s for s in io.readsplitby(file, ",", "\n", *delimeters)
+                       if s != '']
+            yield from validate(rallies)

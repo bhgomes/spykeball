@@ -1,7 +1,12 @@
-include VERSION
+include CODE_OF_CONDUCT.md
+include LICENSE
 include README.rst
+include requirements.txt
+include setup.py
+include VERSION
+recursive-include demo *
+recursive-include docs *
+recursive-include resources *
 recursive-include spykeball *.py
-prune .git
-prune build
-prune dist
+recursive-include tests *.py
 recursive-exclude *.egg-info *

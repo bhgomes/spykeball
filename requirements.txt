@@ -1,3 +1,2 @@
-PyQt5==5.8.2
 pytest==3.1.2
 docopt==0.6.2

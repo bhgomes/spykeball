@@ -10,7 +10,7 @@ Players are evaluated based on their gameplay...
 LICENSE
 _________________
 | This software is licensed under the `MIT Open Source License`_.
-| Copyright 2017 Brandon Gomes, Adrian Gomes, and Max Model
+| Copyright 2017 Brandon Gomes, Adrian Gomes
 
 .. |Travis Status| image:: https://travis-ci.org/bhgomes/spykeball.svg?branch=master
     :target: https://travis-ci.org/bhgomes/spykeball

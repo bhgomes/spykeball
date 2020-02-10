@@ -54,8 +54,8 @@ class Player(util.UIDObject, io.JSONSerializable):
             return False
 
         self._stats[game.UID] = {
-            "stat": game.player_stat(self, stat_model=stat_model),
-            "model": game.stat_model
+            'stat': game.player_stat(self, stat_model=stat_model),
+            'model': game.stat_model
         }
 
         return True
